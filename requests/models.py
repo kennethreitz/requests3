@@ -773,7 +773,7 @@ class Response(object):
             if hasattr(self.raw, 'stream'):
                 try:
                     for chunk in self.raw.stream(
-                        chunk_size, decode_content=True
+                        chunk_size, # decode_content=True
                     ):
                         yield chunk
 

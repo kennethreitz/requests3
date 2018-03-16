@@ -10,20 +10,20 @@ and maintain connections.
 import os.path
 import socket
 
-from urllib3.poolmanager import PoolManager, proxy_from_url
-from urllib3.response import HTTPResponse
-from urllib3.util import Timeout as TimeoutSauce
-from urllib3.util.retry import Retry
-from urllib3.exceptions import ClosedPoolError
-from urllib3.exceptions import ConnectTimeoutError
-from urllib3.exceptions import HTTPError as _HTTPError
-from urllib3.exceptions import MaxRetryError
-from urllib3.exceptions import NewConnectionError
-from urllib3.exceptions import ProxyError as _ProxyError
-from urllib3.exceptions import ProtocolError
-from urllib3.exceptions import ReadTimeoutError
-from urllib3.exceptions import SSLError as _SSLError
-from urllib3.exceptions import ResponseError
+from requests_core.http_manager.poolmanager import PoolManager, proxy_from_url
+from requests_core.http_manager.response import HTTPResponse
+from requests_core.http_manager.util import Timeout as TimeoutSauce
+from requests_core.http_manager.util.retry import Retry
+from requests_core.http_manager.exceptions import ClosedPoolError
+from requests_core.http_manager.exceptions import ConnectTimeoutError
+from requests_core.http_manager.exceptions import HTTPError as _HTTPError
+from requests_core.http_manager.exceptions import MaxRetryError
+from requests_core.http_manager.exceptions import NewConnectionError
+from requests_core.http_manager.exceptions import ProxyError as _ProxyError
+from requests_core.http_manager.exceptions import ProtocolError
+from requests_core.http_manager.exceptions import ReadTimeoutError
+from requests_core.http_manager.exceptions import SSLError as _SSLError
+from requests_core.http_manager.exceptions import ResponseError
 
 from .models import Response
 from .basics import urlparse, basestring
@@ -49,7 +49,7 @@ from .exceptions import (
 from .auth import _basic_auth_str
 
 try:
-    from urllib3.contrib.socks import SOCKSProxyManager
+    from requests_core.http_manager.contrib.socks import SOCKSProxyManager
 except ImportError:
 
     def SOCKSProxyManager(*args, **kwargs):

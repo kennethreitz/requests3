@@ -139,7 +139,7 @@ def extract_cookies_to_jar(jar, request, response):
     # the _original_response field is the wrapped httplib.HTTPResponse object,
     req = MockRequest(request)
     # pull out the HTTPMessage with the headers and put it in the mock:
-    res = MockResponse(response._original_response.msg)
+    res = MockResponse(response._original_response.headers)
     jar.extract_cookies(res, req)
 
 
