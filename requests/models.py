@@ -747,11 +747,11 @@ class Response(object):
         return self._next
 
     @property
-    async def apparent_encoding(self):
+    def apparent_encoding(self):
         """The apparent encoding, provided by the chardet library."""
-        return chardet.detect(await self.content)['encoding']
+        return chardet.detect(self.content)['encoding']
 
-    async def iter_content(self, decode_unicode=False):
+    def iter_content(self, decode_unicode=False):
         """Iterates over the response data.  When stream=True is set on the
         request, this avoids reading the content at once into memory for
         large responses.  The chunk size is the number of bytes it should
@@ -770,11 +770,11 @@ class Response(object):
 
         DEFAULT_CHUNK_SIZE = 1
 
-        async def generate():
+        def generate():
             # Special case for urllib3.
             if hasattr(self.raw, 'stream'):
                 try:
-                    async for chunk in self.raw.stream(
+                    for chunk in self.raw.stream(
                         # chunk_size, decode_content=True
                         decode_content=True
                     ):
@@ -796,7 +796,7 @@ class Response(object):
             else:
                 # Standard file-like object.
                 while True:
-                    chunk = await self.raw.read(chunk_size)
+                    chunk = self.raw.read(chunk_size)
                     if not chunk:
                         break
 
@@ -814,7 +814,7 @@ class Response(object):
 
         # simulate reading small chunks of the content
         reused_chunks = iter_slices(self._content, DEFAULT_CHUNK_SIZE)
-        stream_chunks = await generate().__anext__()
+        stream_chunks = generate()
 
         chunks = reused_chunks if self._content_consumed else stream_chunks
         if decode_unicode:
@@ -906,7 +906,7 @@ class Response(object):
             yield pending
 
     @property
-    async def content(self):
+    def content(self):
         """Content of the response, in bytes."""
         if self._content is False:
             # Read the contents.
@@ -923,7 +923,7 @@ class Response(object):
                 #     [await self.iter_content(CONTENT_CHUNK_SIZE)]
                 # ))
                 self._content = bytes().join(
-                    [await self.iter_content()]
+                    self.iter_content()
                 ) or bytes()
         self._content_consumed = True
         # don't need to release the connection; that's been handled by urllib3
@@ -931,7 +931,7 @@ class Response(object):
         return self._content
 
     @property
-    async def text(self):
+    def text(self):
         """Content of the response, in unicode.
 
         If Response.encoding is None, encoding will be guessed using
@@ -945,7 +945,7 @@ class Response(object):
         # Try charset from content-type
         content = None
         encoding = self.encoding
-        if not await self.content:
+        if not self.content:
             return str('')
 
         # Fallback to auto-detected encoding.
@@ -961,24 +961,24 @@ class Response(object):
             # A TypeError can be raised if encoding is None
             #
             # So we try blindly encoding.
-            content = str(await self.content, errors='replace')
+            content = str(self.content, errors='replace')
         return content
 
-    async def json(self, **kwargs):
+    def json(self, **kwargs):
         r"""Returns the json-encoded content of a response, if any.
 
         :param \*\*kwargs: Optional arguments that ``json.loads`` takes.
         :raises ValueError: If the response body does not contain valid json.
         """
-        if not self.encoding and await self.content and len(await self.content) > 3:
+        if not self.encoding and self.content and len(self.content) > 3:
             # No encoding set. JSON RFC 4627 section 3 states we should expect
             # UTF-8, -16 or -32. Detect which one to use; If the detection or
             # decoding fails, fall back to `self.text` (using chardet to make
             # a best guess).
-            encoding = guess_json_utf(await self.content)
+            encoding = guess_json_utf(self.content)
             if encoding is not None:
                 try:
-                    content = await self.content
+                    content = self.content
                     return complexjson.loads(
                         content.decode(encoding), **kwargs
                     )
@@ -989,7 +989,7 @@ class Response(object):
                     # and the server didn't bother to tell us what codec *was*
                     # used.
                     pass
-        return complexjson.loads(await self.text, **kwargs)
+        return complexjson.loads(self.text, **kwargs)
 
     @property
     def links(self):
@@ -1043,3 +1043,156 @@ class Response(object):
         release_conn = getattr(self.raw, 'release_conn', None)
         if release_conn is not None:
             release_conn()
+
+
+class AsyncResponse(Response):
+    def __init__(self, *args, **kwargs):
+        super(AsyncResponse, self).__init__(*args, **kwargs)
+
+    async def json(self, **kwargs):
+        r"""Returns the json-encoded content of a response, if any.
+
+        :param \*\*kwargs: Optional arguments that ``json.loads`` takes.
+        :raises ValueError: If the response body does not contain valid json.
+        """
+        if not self.encoding and await self.content and len(await self.content) > 3:
+            # No encoding set. JSON RFC 4627 section 3 states we should expect
+            # UTF-8, -16 or -32. Detect which one to use; If the detection or
+            # decoding fails, fall back to `self.text` (using chardet to make
+            # a best guess).
+            encoding = guess_json_utf(await self.content)
+            if encoding is not None:
+                try:
+                    content = await self.content
+                    return complexjson.loads(
+                        content.decode(encoding), **kwargs
+                    )
+
+                except UnicodeDecodeError:
+                    # Wrong UTF codec detected; usually because it's not UTF-8
+                    # but some other 8-bit codec.  This is an RFC violation,
+                    # and the server didn't bother to tell us what codec *was*
+                    # used.
+                    pass
+        return complexjson.loads(await self.text, **kwargs)
+
+    @property
+    async def text(self):
+        """Content of the response, in unicode.
+
+        If Response.encoding is None, encoding will be guessed using
+        ``chardet``.
+
+        The encoding of the response content is determined based solely on HTTP
+        headers, following RFC 2616 to the letter. If you can take advantage of
+        non-HTTP knowledge to make a better guess at the encoding, you should
+        set ``r.encoding`` appropriately before accessing this property.
+        """
+        # Try charset from content-type
+        content = None
+        encoding = self.encoding
+        if not await self.content:
+            return str('')
+
+        # Fallback to auto-detected encoding.
+        if self.encoding is None:
+            encoding = self.apparent_encoding
+        # Decode unicode from given encoding.
+        try:
+            content = str(self.content, encoding, errors='replace')
+        except (LookupError, TypeError):
+            # A LookupError is raised if the encoding was not found which could
+            # indicate a misspelling or similar mistake.
+            #
+            # A TypeError can be raised if encoding is None
+            #
+            # So we try blindly encoding.
+            content = str(await self.content, errors='replace')
+        return content
+
+    @property
+    async def content(self):
+        """Content of the response, in bytes."""
+        if self._content is False:
+            # Read the contents.
+            if self._content_consumed:
+                raise RuntimeError(
+                    'The content for this response was already consumed'
+                )
+
+            if self.status_code == 0 or self.raw is None:
+                self._content = None
+            else:
+                # self._content = await self.iter_content(CONTENT_CHUNK_SIZE)
+                # print(bytes().join(
+                #     [await self.iter_content(CONTENT_CHUNK_SIZE)]
+                # ))
+                self._content = bytes().join(
+                    [await self.iter_content()]
+                ) or bytes()
+        self._content_consumed = True
+        # don't need to release the connection; that's been handled by urllib3
+        # since we exhausted the data.
+        return self._content
+
+
+    @property
+    async def apparent_encoding(self):
+        """The apparent encoding, provided by the chardet library."""
+        return chardet.detect(await self.content)['encoding']
+
+    async def iter_content(self, decode_unicode=False):
+        """Iterates over the response data.  When stream=True is set on the
+        request, this avoids reading the content at once into memory for
+        large responses.  The chunk size is the number of bytes it should
+        read into memory.  This is not necessarily the length of each item
+        returned as decoding can take place.
+
+        chunk_size must be of type int or None. A value of None will
+        function differently depending on the value of `stream`.
+        stream=True will read data as it arrives in whatever size the
+        chunks are received. If stream=False, data is returned as
+        a single chunk.
+
+        If using decode_unicode, the encoding must be set to a valid encoding
+        enumeration before invoking iter_content.
+        """
+
+        DEFAULT_CHUNK_SIZE = 1
+
+        async def generate():
+            # Special case for urllib3.
+            if hasattr(self.raw, 'stream'):
+                try:
+                    async for chunk in self.raw.stream(
+                        # chunk_size, decode_content=True
+                        decode_content=True
+                    ):
+                        yield chunk
+
+                except ProtocolError as e:
+                    if self.headers.get('Transfer-Encoding') == 'chunked':
+                        raise ChunkedEncodingError(e)
+
+                    else:
+                        raise ConnectionError(e)
+
+                except DecodeError as e:
+                    raise ContentDecodingError(e)
+
+                except ReadTimeoutError as e:
+                    raise ReadTimeout(e)
+
+            else:
+                # Standard file-like object.
+                while True:
+                    chunk = await self.raw.read(chunk_size)
+                    if not chunk:
+                        break
+
+                    yield chunk
+
+            self._content_consumed = True
+
+        if self._content_consumed and isinstance(self._content, bool):
+            raise StreamConsumedError()

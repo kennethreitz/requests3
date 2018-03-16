@@ -28,7 +28,7 @@ from .core.http_manager.exceptions import ReadTimeoutError
 from .core.http_manager.exceptions import SSLError as _SSLError
 from .core.http_manager.exceptions import ResponseError
 
-from .models import Response
+from .models import Response, AsyncResponse
 from .basics import urlparse, basestring
 from .utils import (
     DEFAULT_CA_BUNDLE_PATH,
@@ -420,7 +420,7 @@ class HTTPAdapter(BaseAdapter):
             )
         return headers
 
-    async def send(
+    def send(
         self,
         request,
         stream=False,
@@ -565,7 +565,7 @@ class HTTPAdapter(BaseAdapter):
             else:
                 raise
 
-        return await self.build_response(request, resp)
+        return self.build_response(request, resp)
 
 
 class AsyncHTTPAdapter(HTTPAdapter):
@@ -584,7 +584,7 @@ class AsyncHTTPAdapter(HTTPAdapter):
         :param resp: The urllib3 response object.
         :rtype: requests.Response
         """
-        response = Response()
+        response = AsyncResponse()
         # Fallback to None if there's no status_code, for whatever reason.
         response.status_code = getattr(resp, 'status', None)
         # Make headers case-insensitive.
