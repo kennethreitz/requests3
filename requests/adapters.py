@@ -10,6 +10,7 @@ and maintain connections.
 import os.path
 import socket
 
+import requests_core
 from requests_core.http_manager.poolmanager import PoolManager, proxy_from_url
 from requests_core.http_manager.response import HTTPResponse
 from requests_core.http_manager.util import Timeout as TimeoutSauce
@@ -466,7 +467,7 @@ class HTTPAdapter(BaseAdapter):
             timeout = TimeoutSauce(connect=timeout, read=timeout)
         try:
             if not chunked:
-                resp = conn.urlopen(
+                resp = requests_core.blocking_request(
                     method=request.method,
                     url=url,
                     body=request.body,
@@ -478,6 +479,7 @@ class HTTPAdapter(BaseAdapter):
                     retries=self.max_retries,
                     timeout=timeout,
                     enforce_content_length=True,
+                    pool=conn
                 )
             # Send the request.
             else:
