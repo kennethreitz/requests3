@@ -11,22 +11,22 @@ import os.path
 import socket
 
 import requests_core
-from requests_core.http_manager._backends import TrioBackend
-from requests_core.http_manager.poolmanager import PoolManager, proxy_from_url
-from requests_core.http_manager._async.poolmanager import PoolManager as AsyncPoolManager
-from requests_core.http_manager.response import HTTPResponse
-from requests_core.http_manager.util import Timeout as TimeoutSauce
-from requests_core.http_manager.util.retry import Retry
-from requests_core.http_manager.exceptions import ClosedPoolError
-from requests_core.http_manager.exceptions import ConnectTimeoutError
-from requests_core.http_manager.exceptions import HTTPError as _HTTPError
-from requests_core.http_manager.exceptions import MaxRetryError
-from requests_core.http_manager.exceptions import NewConnectionError
-from requests_core.http_manager.exceptions import ProxyError as _ProxyError
-from requests_core.http_manager.exceptions import ProtocolError
-from requests_core.http_manager.exceptions import ReadTimeoutError
-from requests_core.http_manager.exceptions import SSLError as _SSLError
-from requests_core.http_manager.exceptions import ResponseError
+from .core.http_manager._backends import TrioBackend
+from .core.http_manager.poolmanager import PoolManager, proxy_from_url
+from .core.http_manager._async.poolmanager import PoolManager as AsyncPoolManager
+from .core.http_manager.response import HTTPResponse
+from .core.http_manager.util import Timeout as TimeoutSauce
+from .core.http_manager.util.retry import Retry
+from .core.http_manager.exceptions import ClosedPoolError
+from .core.http_manager.exceptions import ConnectTimeoutError
+from .core.http_manager.exceptions import HTTPError as _HTTPError
+from .core.http_manager.exceptions import MaxRetryError
+from .core.http_manager.exceptions import NewConnectionError
+from .core.http_manager.exceptions import ProxyError as _ProxyError
+from .core.http_manager.exceptions import ProtocolError
+from .core.http_manager.exceptions import ReadTimeoutError
+from .core.http_manager.exceptions import SSLError as _SSLError
+from .core.http_manager.exceptions import ResponseError
 
 from .models import Response
 from .basics import urlparse, basestring

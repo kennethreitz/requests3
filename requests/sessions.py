@@ -12,7 +12,7 @@ import time
 from collections import Mapping, OrderedDict
 from datetime import timedelta
 
-from requests_core.http_manager._backends.trio_backend import TrioBackend
+from .core.http_manager._backends.trio_backend import TrioBackend
 
 from .auth import _basic_auth_str
 from .basics import cookielib, urljoin, urlparse, str
