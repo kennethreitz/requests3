@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import pytest
 
-from requests import hooks
+from requests3 import hooks
 
 
 def hook(value):

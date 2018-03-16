@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import pytest
 
-from requests.structures import CaseInsensitiveDict, LookupDict, HTTPHeaderDict
+from requests3.structures import CaseInsensitiveDict, LookupDict, HTTPHeaderDict
 from urllib3._collections import HTTPHeaderDict as U3HeaderDict
 
 

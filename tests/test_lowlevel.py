@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import pytest
 import threading
-import requests
+import requests3 as requests
 
 from tests.testserver.server import Server, consume_socket_content
 

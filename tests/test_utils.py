@@ -4,10 +4,10 @@ import copy
 from io import BytesIO
 
 import pytest
-from requests import basics
-from requests.cookies import RequestsCookieJar
-from requests.structures import CaseInsensitiveDict
-from requests.utils import (
+from requests3 import basics
+from requests3.cookies import RequestsCookieJar
+from requests3.structures import CaseInsensitiveDict
+from requests3.utils import (
     address_in_network,
     dotted_netmask,
     get_auth_from_url,
@@ -33,7 +33,7 @@ from requests.utils import (
     add_dict_to_cookiejar,
     set_environ,
 )
-from requests._internal_utils import unicode_is_ascii
+from requests3._internal_utils import unicode_is_ascii
 
 from .compat import StringIO
 

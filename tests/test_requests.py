@@ -14,13 +14,13 @@ import io
 import requests
 import pytest
 import pytest_httpbin
-from requests.adapters import HTTPAdapter
-from requests.auth import HTTPDigestAuth, _basic_auth_str
-from requests.basics import (
+from requests3.adapters import HTTPAdapter
+from requests3.auth import HTTPDigestAuth, _basic_auth_str
+from requests3.basics import (
     Morsel, cookielib, getproxies, str, urlparse, builtin_str
 )
-from requests.cookies import ( cookiejar_from_dict, morsel_to_cookie)
-from requests.exceptions import (
+from requests3.cookies import ( cookiejar_from_dict, morsel_to_cookie)
+from requests3.exceptions import (
     ConnectionError,
     ConnectTimeout,
     InvalidScheme,
@@ -36,12 +36,12 @@ from requests.exceptions import (
     InvalidBodyError,
     SSLError,
 )
-from requests.models import PreparedRequest
-from requests.structures import CaseInsensitiveDict
-from requests.sessions import SessionRedirectMixin
-from requests.models import urlencode
-from requests.hooks import default_hooks
-from requests.utils import DEFAULT_CA_BUNDLE_PATH
+from requests3.models import PreparedRequest
+from requests3.structures import CaseInsensitiveDict
+from requests3.sessions import SessionRedirectMixin
+from requests3.models import urlencode
+from requests3.hooks import default_hooks
+from requests3.utils import DEFAULT_CA_BUNDLE_PATH
 
 from .compat import StringIO, u
 from .utils import override_environ

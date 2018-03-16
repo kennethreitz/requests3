@@ -3,7 +3,7 @@ import sys
 
 import pytest
 
-from requests.help import info
+from requests3.help import info
 
 
 @pytest.mark.skipif(

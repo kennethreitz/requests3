@@ -4,7 +4,7 @@ import socket
 import time
 
 import pytest
-import requests
+import requests3 as requests
 from tests.testserver.server import Server
 
 

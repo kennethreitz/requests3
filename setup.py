@@ -68,7 +68,7 @@ if sys.argv[-1] == 'publish':
     os.system('python setup.py sdist bdist_wheel')
     os.system('twine upload dist/*')
     sys.exit()
-packages = ['requests']
+packages = ['requests3']
 requires = [
     'chardet>=3.0.2,<3.1.0',
     'idna>=2.5,<2.7',
@@ -88,7 +88,7 @@ test_requirements = [
     'white',
 ]
 about = {}
-with open(os.path.join(here, 'requests', '__version__.py'), 'r', 'utf-8') as f:
+with open(os.path.join(here, 'requests3', '__version__.py'), 'r', 'utf-8') as f:
     exec (f.read(), about)
 with open('README.rst', 'r', 'utf-8') as f:
     readme = f.read()
