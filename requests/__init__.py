@@ -116,7 +116,7 @@ from .__version__ import __copyright__, __cake__
 from .import utils
 from .models import Request, Response, PreparedRequest
 from .api import request, get, head, post, patch, put, delete, options
-from .sessions import Session
+from .sessions import Session, AsyncSession
 from .status_codes import codes
 from .exceptions import (
     RequestException,

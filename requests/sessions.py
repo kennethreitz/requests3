@@ -12,6 +12,8 @@ import time
 from collections import Mapping, OrderedDict
 from datetime import timedelta
 
+from requests_core.http_manager._backends.trio_backend import TrioBackend
+
 from .auth import _basic_auth_str
 from .basics import cookielib, urljoin, urlparse, str
 from .cookies import (
@@ -35,7 +37,7 @@ from .exceptions import (
 )
 
 from .structures import CaseInsensitiveDict
-from .adapters import HTTPAdapter
+from .adapters import HTTPAdapter, AsyncHTTPAdapter
 
 from .utils import (
     requote_uri,
@@ -743,3 +745,220 @@ class Session(SessionRedirectMixin):
     def __setstate__(self, state):
         for attr, value in state.items():
             setattr(self, attr, value)
+
+
+class AsyncSession(Session):
+    """docstring for AsyncSession"""
+    def __init__(self, backend=None):
+        self.backend = backend or TrioBackend()
+        super(AsyncSession, self).__init__()
+        self.mount('https://', AsyncHTTPAdapter())
+        self.mount('http://', AsyncHTTPAdapter())
+
+    async def get(self, url, **kwargs):
+        r"""Sends a GET request. Returns :class:`Response` object.
+
+        :param url: URL for the new :class:`Request` object.
+        :param \*\*kwargs: Optional arguments that ``request`` takes.
+        :rtype: requests.Response
+        """
+        kwargs.setdefault('allow_redirects', True)
+        return await self.request('GET', url, **kwargs)
+
+    async def options(self, url, **kwargs):
+        r"""Sends a OPTIONS request. Returns :class:`Response` object.
+
+        :param url: URL for the new :class:`Request` object.
+        :param \*\*kwargs: Optional arguments that ``request`` takes.
+        :rtype: requests.Response
+        """
+        kwargs.setdefault('allow_redirects', True)
+        return await self.request('OPTIONS', url, **kwargs)
+
+    async def head(self, url, **kwargs):
+        r"""Sends a HEAD request. Returns :class:`Response` object.
+
+        :param url: URL for the new :class:`Request` object.
+        :param \*\*kwargs: Optional arguments that ``request`` takes.
+        :rtype: requests.Response
+        """
+        kwargs.setdefault('allow_redirects', False)
+        return await self.request('HEAD', url, **kwargs)
+
+    async def post(self, url, data=None, json=None, **kwargs):
+        r"""Sends a POST request. Returns :class:`Response` object.
+
+        :param url: URL for the new :class:`Request` object.
+        :param data: (optional) Dictionary, bytes, or file-like object to send in the body of the :class:`Request`.
+        :param json: (optional) json to send in the body of the :class:`Request`.
+        :param \*\*kwargs: Optional arguments that ``request`` takes.
+        :rtype: requests.Response
+        """
+        return await self.request('POST', url, data=data, json=json, **kwargs)
+
+    async def put(self, url, data=None, **kwargs):
+        r"""Sends a PUT request. Returns :class:`Response` object.
+
+        :param url: URL for the new :class:`Request` object.
+        :param data: (optional) Dictionary, bytes, or file-like object to send in the body of the :class:`Request`.
+        :param \*\*kwargs: Optional arguments that ``request`` takes.
+        :rtype: requests.Response
+        """
+        return await self.request('PUT', url, data=data, **kwargs)
+
+    async def patch(self, url, data=None, **kwargs):
+        r"""Sends a PATCH request. Returns :class:`Response` object.
+
+        :param url: URL for the new :class:`Request` object.
+        :param data: (optional) Dictionary, bytes, or file-like object to send in the body of the :class:`Request`.
+        :param \*\*kwargs: Optional arguments that ``request`` takes.
+        :rtype: requests.Response
+        """
+        return await self.request('PATCH', url, data=data, **kwargs)
+
+    async def delete(self, url, **kwargs):
+        r"""Sends a DELETE request. Returns :class:`Response` object.
+
+        :param url: URL for the new :class:`Request` object.
+        :param \*\*kwargs: Optional arguments that ``request`` takes.
+        :rtype: requests.Response
+        """
+        return await self.request('DELETE', url, **kwargs)
+
+    async def request(
+        self,
+        method,
+        url,
+        params=None,
+        data=None,
+        headers=None,
+        cookies=None,
+        files=None,
+        auth=None,
+        timeout=None,
+        allow_redirects=True,
+        proxies=None,
+        hooks=None,
+        stream=None,
+        verify=None,
+        cert=None,
+        json=None,
+    ):
+        """Constructs a :class:`Request <Request>`, prepares it, and sends it.
+        Returns :class:`Response <Response>` object.
+
+        :param method: method for the new :class:`Request` object.
+        :param url: URL for the new :class:`Request` object.
+        :param params: (optional) Dictionary or bytes to be sent in the query
+            string for the :class:`Request`.
+        :param data: (optional) Dictionary, bytes, or file-like object to send
+            in the body of the :class:`Request`.
+        :param json: (optional) json to send in the body of the
+            :class:`Request`.
+        :param headers: (optional) Dictionary of HTTP Headers to send with the
+            :class:`Request`.
+        :param cookies: (optional) Dict or CookieJar object to send with the
+            :class:`Request`.
+        :param files: (optional) Dictionary of ``'filename': file-like-objects``
+            for multipart encoding upload.
+        :param auth: (optional) Auth tuple or callable to enable
+            Basic/Digest/Custom HTTP Auth.
+        :param timeout: (optional) How long to wait for the server to send
+            data before giving up, as a float, or a :ref:`(connect timeout,
+            read timeout) <timeouts>` tuple.
+        :type timeout: float or tuple
+        :param allow_redirects: (optional) Set to True by default.
+        :type allow_redirects: bool
+        :param proxies: (optional) Dictionary mapping protocol or protocol and
+            hostname to the URL of the proxy.
+        :param stream: (optional) whether to immediately download the response
+            content. Defaults to ``False``.
+        :param verify: (optional) Either a boolean, in which case it controls whether we verify
+            the server's TLS certificate, or a string, in which case it must be a path
+            to a CA bundle to use. Defaults to ``True``.
+        :param cert: (optional) if String, path to ssl client cert file (.pem).
+            If Tuple, ('cert', 'key') pair.
+        :rtype: requests.Response
+        """
+        # Create the Request.
+        req = Request(
+            method=method.upper(),
+            url=url,
+            headers=headers,
+            files=files,
+            data=data or {},
+            json=json,
+            params=params or {},
+            auth=auth,
+            cookies=cookies,
+            hooks=hooks,
+        )
+        prep = self.prepare_request(req)
+        proxies = proxies or {}
+        settings = self.merge_environment_settings(
+            prep.url, proxies, stream, verify, cert
+        )
+        # Send the request.
+        send_kwargs = {'timeout': timeout, 'allow_redirects': allow_redirects}
+        send_kwargs.update(settings)
+        resp = await self.send(prep, **send_kwargs)
+        return resp
+
+    async def send(self, request, **kwargs):
+        """Send a given PreparedRequest.
+
+        :rtype: requests.Response
+        """
+        # Set defaults that the hooks can utilize to ensure they always have
+        # the correct parameters to reproduce the previous request.
+        kwargs.setdefault('stream', self.stream)
+        kwargs.setdefault('verify', self.verify)
+        kwargs.setdefault('cert', self.cert)
+        kwargs.setdefault('proxies', self.proxies)
+        # It's possible that users might accidentally send a Request object.
+        # Guard against that specific failure case.
+        if isinstance(request, Request):
+            raise ValueError('You can only send PreparedRequests.')
+
+        # Set up variables needed for resolve_redirects and dispatching of
+        # hooks
+        allow_redirects = kwargs.pop('allow_redirects', True)
+        stream = kwargs.get('stream')
+        hooks = request.hooks
+        # Get the appropriate adapter to use
+        adapter = self.get_adapter(url=request.url)
+        # Start time (approximately) of the request
+        start = preferred_clock()
+        # Send the request
+        r = await adapter.send(request, **kwargs)
+        # Total elapsed time of the request (approximately)
+        elapsed = preferred_clock() - start
+        r.elapsed = timedelta(seconds=elapsed)
+        # Response manipulation hooks.
+        r = dispatch_hook('response', hooks, r, **kwargs)
+        # Persist cookies
+        if r.history:
+            # If the hooks create history then we want those cookies too
+            for resp in r.history:
+                extract_cookies_to_jar(self.cookies, resp.request, resp.raw)
+        extract_cookies_to_jar(self.cookies, request, r.raw)
+        # Redirect resolving generator.
+        gen = self.resolve_redirects(r, request, **kwargs)
+        # Resolve redirects, if allowed.
+        history = [resp for resp in gen] if allow_redirects else []
+        # If there is a history, replace ``r`` with the last response
+        if history:
+            r = history.pop()
+        # If redirects aren't being followed, store the response on the Request for Response.next().
+        if not allow_redirects:
+            try:
+                r._next = next(
+                    self.resolve_redirects(
+                        r, request, yield_requests=True, **kwargs
+                    )
+                )
+            except StopIteration:
+                pass
+        if not stream:
+            r.content
+        return r
