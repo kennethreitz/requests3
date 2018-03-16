@@ -11,7 +11,9 @@ import os.path
 import socket
 
 import requests_core
+from requests_core.http_manager._backends import TrioBackend
 from requests_core.http_manager.poolmanager import PoolManager, proxy_from_url
+from requests_core.http_manager._async.poolmanager import PoolManager as AsyncPoolManager
 from requests_core.http_manager.response import HTTPResponse
 from requests_core.http_manager.util import Timeout as TimeoutSauce
 from requests_core.http_manager.util.retry import Retry
@@ -418,7 +420,7 @@ class HTTPAdapter(BaseAdapter):
             )
         return headers
 
-    def send(
+    async def send(
         self,
         request,
         stream=False,
@@ -563,12 +565,108 @@ class HTTPAdapter(BaseAdapter):
             else:
                 raise
 
-        return self.build_response(request, resp)
+        return await self.build_response(request, resp)
+
 
 class AsyncHTTPAdapter(HTTPAdapter):
     """docstring for AsyncHTTPAdapter"""
-    def __init__(self, *args, **kwargs):
+    def __init__(self, backend=None, *args, **kwargs):
+        self.backend = backend or TrioBackend()
         super(AsyncHTTPAdapter, self).__init__(*args, **kwargs)
+
+    async def build_response(self, req, resp):
+        """Builds a :class:`Response <requests.Response>` object from a urllib3
+        response. This should not be called from user code, and is only exposed
+        for use when subclassing the
+        :class:`HTTPAdapter <requests.adapters.HTTPAdapter>`
+
+        :param req: The :class:`PreparedRequest <PreparedRequest>` used to generate the response.
+        :param resp: The urllib3 response object.
+        :rtype: requests.Response
+        """
+        response = Response()
+        # Fallback to None if there's no status_code, for whatever reason.
+        response.status_code = getattr(resp, 'status', None)
+        # Make headers case-insensitive.
+        response.headers = HTTPHeaderDict(getattr(resp, 'headers', {}))
+        # Set encoding.
+        response.encoding = get_encoding_from_headers(response.headers)
+        response.raw = resp
+        response.reason = response.raw.reason
+        if isinstance(req.url, bytes):
+            response.url = req.url.decode('utf-8')
+        else:
+            response.url = req.url
+        # Add new cookies from the server.
+        extract_cookies_to_jar(response.cookies, req, resp)
+        # Give the Response some context.
+        response.request = req
+        response.connection = self
+        return response
+
+    def init_poolmanager(
+        self, connections, maxsize, block=DEFAULT_POOLBLOCK, **pool_kwargs
+    ):
+        """Initializes a urllib3 PoolManager.
+
+        This method should not be called from user code, and is only
+        exposed for use when subclassing the
+        :class:`HTTPAdapter <requests.adapters.HTTPAdapter>`.
+
+        :param connections: The number of urllib3 connection pools to cache.
+        :param maxsize: The maximum number of connections to save in the pool.
+        :param block: Block when no free connections are available.
+        :param pool_kwargs: Extra keyword arguments used to initialize the Pool Manager.
+        """
+        # save these values for pickling
+        self._pool_connections = connections
+        self._pool_maxsize = maxsize
+        self._pool_block = block
+        self.poolmanager = AsyncPoolManager(
+            num_pools=connections,
+            maxsize=maxsize,
+            block=block,
+            strict=True,
+            backend=self.backend,
+            **pool_kwargs,
+        )
+
+    def get_connection(self, url, proxies=None, verify=None, cert=None):
+        """Returns a urllib3 connection for the given URL. This should not be
+        called from user code, and is only exposed for use when subclassing the
+        :class:`HTTPAdapter <requests.adapters.HTTPAdapter>`.
+
+        :param url: The URL to connect to.
+        :param proxies: (optional) A Requests-style dictionary of proxies used on this request.
+        :rtype: urllib3.ConnectionPool
+        """
+        pool_kwargs = _pool_kwargs(verify, cert)
+        proxy = select_proxy(url, proxies)
+        if proxy:
+            proxy = prepend_scheme_if_needed(proxy, 'http')
+            proxy_manager = self.proxy_manager_for(proxy)
+            conn = proxy_manager.connection_from_url(
+                url, pool_kwargs=pool_kwargs
+            )
+        else:
+            # Only scheme should be lower case
+            parsed = urlparse(url)
+            url = parsed.geturl()
+            conn = self.poolmanager.connection_from_url(
+                url, pool_kwargs=pool_kwargs
+            )
+        return conn
+
+    def close(self):
+        """Disposes of any internal state.
+
+        Currently, this closes the PoolManager and any active ProxyManager,
+        which closes any pooled connections.
+        """
+        self.poolmanager.clear()
+        for proxy in self.proxy_manager.values():
+            proxy.clear()
+        pass
 
     async def send(
         self,
@@ -595,6 +693,7 @@ class AsyncHTTPAdapter(HTTPAdapter):
         :rtype: requests.Response
         """
         conn = self.get_connection(request.url, proxies, verify, cert)
+
         url = self.request_url(request, proxies)
         self.add_headers(request)
         chunked = not (
@@ -633,6 +732,7 @@ class AsyncHTTPAdapter(HTTPAdapter):
                     enforce_content_length=True,
                     pool=conn
                 )
+
             # Send the request.
             else:
                 if hasattr(conn, 'proxy_pool'):
@@ -658,7 +758,7 @@ class AsyncHTTPAdapter(HTTPAdapter):
                     # Receive the response from the server
                     try:
                         # For Python 2.7, use buffering of HTTP responses
-                        r = low_conn.getresponse(buffering=True)
+                        r = alow_conn.getresponse(buffering=True)
                     except TypeError:
                         # For Python 3.3+ versions, this is the default
                         r = low_conn.getresponse()
@@ -715,4 +815,4 @@ class AsyncHTTPAdapter(HTTPAdapter):
             else:
                 raise
 
-        return self.build_response(request, resp)
+        return await self.build_response(request, resp)

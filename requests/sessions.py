@@ -752,8 +752,8 @@ class AsyncSession(Session):
     def __init__(self, backend=None):
         self.backend = backend or TrioBackend()
         super(AsyncSession, self).__init__()
-        self.mount('https://', AsyncHTTPAdapter())
-        self.mount('http://', AsyncHTTPAdapter())
+        self.mount('https://', AsyncHTTPAdapter(backend=self.backend))
+        self.mount('http://', AsyncHTTPAdapter(backend=self.backend))
 
     async def get(self, url, **kwargs):
         r"""Sends a GET request. Returns :class:`Response` object.
@@ -960,5 +960,5 @@ class AsyncSession(Session):
             except StopIteration:
                 pass
         if not stream:
-            r.content
+            await r.content
         return r
