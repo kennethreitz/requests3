@@ -17,9 +17,9 @@ import sys
 import rfc3986
 import encodings.idna
 
-from urllib3.fields import RequestField
-from urllib3.filepost import encode_multipart_formdata
-from urllib3.exceptions import (
+from .core.http_manager.fields import RequestField
+from .core.http_manager.filepost import encode_multipart_formdata
+from .core.http_manager.exceptions import (
     DecodeError, ReadTimeoutError, ProtocolError, LocationParseError
 )
 
@@ -1165,7 +1165,6 @@ class AsyncResponse(Response):
             if hasattr(self.raw, 'stream'):
                 try:
                     async for chunk in self.raw.stream(
-                        # chunk_size, decode_content=True
                         decode_content=True
                     ):
                         yield chunk
@@ -1196,3 +1195,23 @@ class AsyncResponse(Response):
 
         if self._content_consumed and isinstance(self._content, bool):
             raise StreamConsumedError()
+
+        reused_chunks = iter_slices(self._content, DEFAULT_CHUNK_SIZE)
+        try:
+            stream_chunks = await generate().__anext__()
+        except StopAsyncIteration:
+            stream_chunks = None
+
+        chunks = reused_chunks if self._content_consumed else stream_chunks
+        if decode_unicode:
+            if self.encoding is None:
+                raise TypeError(
+                    'encoding must be set before consuming streaming '
+                    'responses'
+                )
+
+            # check encoding value here, don't wait for the generator to be
+            # consumed before raising an exception
+            codecs.lookup(self.encoding)
+            chunks = stream_decode_response_unicode(chunks, self)
+        return chunks
