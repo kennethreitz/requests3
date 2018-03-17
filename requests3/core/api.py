@@ -24,6 +24,7 @@ async def request(
             url=url,
             headers=headers,
             preload_content=preload_content,
+            body=body,
             **kwargs
         )
 
@@ -48,6 +49,7 @@ def blocking_request(
             url=url,
             headers=headers,
             preload_content=preload_content,
+            body=body,
             **kwargs
         )
         return r
