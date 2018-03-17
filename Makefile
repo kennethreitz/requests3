@@ -3,7 +3,7 @@ core:
 	rm -fr requests/core
 	git clone https://github.com/kennethreitz/requests-core
 	cd requests-core && python setup.py compile
-	mv requests-core/requests_core requests3/core
+	cd .. && mv requests-core/requests_core requests3/core
 	rm -fr requests-core
 init:
 	pip install pipenv --upgrade
