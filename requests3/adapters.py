@@ -10,7 +10,7 @@ and maintain connections.
 import os.path
 import socket
 
-import requests_core
+from . import core
 from .core.http_manager._backends import TrioBackend
 from .core.http_manager.poolmanager import PoolManager, proxy_from_url
 from .core.http_manager._async.poolmanager import PoolManager as AsyncPoolManager
@@ -52,7 +52,7 @@ from .exceptions import (
 from .auth import _basic_auth_str
 
 try:
-    from requests_core.http_manager.contrib.socks import SOCKSProxyManager
+    from .core.http_manager.contrib.socks import SOCKSProxyManager
 except ImportError:
 
     def SOCKSProxyManager(*args, **kwargs):
@@ -469,7 +469,7 @@ class HTTPAdapter(BaseAdapter):
             timeout = TimeoutSauce(connect=timeout, read=timeout)
         try:
             if not chunked:
-                resp = requests_core.blocking_request(
+                resp = core.blocking_request(
                     method=request.method,
                     url=url,
                     body=request.body,
@@ -718,7 +718,7 @@ class AsyncHTTPAdapter(HTTPAdapter):
             timeout = TimeoutSauce(connect=timeout, read=timeout)
         try:
             if not chunked:
-                resp = await requests_core.request(
+                resp = await core.request(
                     method=request.method,
                     url=url,
                     body=request.body,
