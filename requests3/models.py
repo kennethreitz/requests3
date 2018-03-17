@@ -17,9 +17,9 @@ import sys
 import rfc3986
 import encodings.idna
 
-from .core.http_manager.fields import RequestField
-from .core.http_manager.filepost import encode_multipart_formdata
-from .core.http_manager.exceptions import (
+from .core._http.fields import RequestField
+from .core._http.filepost import encode_multipart_formdata
+from .core._http.exceptions import (
     DecodeError, ReadTimeoutError, ProtocolError, LocationParseError
 )
 

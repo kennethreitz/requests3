@@ -11,22 +11,22 @@ import os.path
 import socket
 
 from . import core
-from .core.http_manager._backends import TrioBackend
-from .core.http_manager.poolmanager import PoolManager, proxy_from_url
-from .core.http_manager._async.poolmanager import PoolManager as AsyncPoolManager
-from .core.http_manager.response import HTTPResponse
-from .core.http_manager.util import Timeout as TimeoutSauce
-from .core.http_manager.util.retry import Retry
-from .core.http_manager.exceptions import ClosedPoolError
-from .core.http_manager.exceptions import ConnectTimeoutError
-from .core.http_manager.exceptions import HTTPError as _HTTPError
-from .core.http_manager.exceptions import MaxRetryError
-from .core.http_manager.exceptions import NewConnectionError
-from .core.http_manager.exceptions import ProxyError as _ProxyError
-from .core.http_manager.exceptions import ProtocolError
-from .core.http_manager.exceptions import ReadTimeoutError
-from .core.http_manager.exceptions import SSLError as _SSLError
-from .core.http_manager.exceptions import ResponseError
+from .core._http._backends import TrioBackend
+from .core._http.poolmanager import PoolManager, proxy_from_url
+from .core._http._async.poolmanager import PoolManager as AsyncPoolManager
+from .core._http.response import HTTPResponse
+from .core._http.util import Timeout as TimeoutSauce
+from .core._http.util.retry import Retry
+from .core._http.exceptions import ClosedPoolError
+from .core._http.exceptions import ConnectTimeoutError
+from .core._http.exceptions import HTTPError as _HTTPError
+from .core._http.exceptions import MaxRetryError
+from .core._http.exceptions import NewConnectionError
+from .core._http.exceptions import ProxyError as _ProxyError
+from .core._http.exceptions import ProtocolError
+from .core._http.exceptions import ReadTimeoutError
+from .core._http.exceptions import SSLError as _SSLError
+from .core._http.exceptions import ResponseError
 
 from .models import Response, AsyncResponse
 from .basics import urlparse, basestring
@@ -52,7 +52,7 @@ from .exceptions import (
 from .auth import _basic_auth_str
 
 try:
-    from .core.http_manager.contrib.socks import SOCKSProxyManager
+    from .core._http.contrib.socks import SOCKSProxyManager
 except ImportError:
 
     def SOCKSProxyManager(*args, **kwargs):
