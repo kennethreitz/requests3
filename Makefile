@@ -1,6 +1,6 @@
 .PHONY: docs
 core:
-	rm -fr requests/core
+	rm -fr requests3/core
 	git clone https://github.com/kennethreitz/requests-core
 	cd requests-core && python setup.py compile
 	cd .. && mv requests-core/requests_core requests3/core
