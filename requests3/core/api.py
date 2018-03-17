@@ -1,9 +1,7 @@
 import trio
 
-from .http_manager import AsyncPoolManager, PoolManager
-from .http_manager._backends import TrioBackend
-from . import http_manager
-
+from ._http import AsyncPoolManager, PoolManager
+from ._http._backends import TrioBackend
 
 async def request(
     method,
