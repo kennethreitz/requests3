@@ -1161,7 +1161,7 @@ class AsyncResponse(Response):
         DEFAULT_CHUNK_SIZE = 1
 
         async def generate():
-            # Special case for urllib3.
+            # Special case for requests.core.
             if hasattr(self.raw, 'stream'):
                 try:
                     async for chunk in self.raw.stream(
