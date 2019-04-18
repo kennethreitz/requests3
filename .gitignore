@@ -24,3 +24,7 @@ dist
 
 /.mypy_cache/
 .vscode/
+
+/.pytest_cache/
+
+/.tox/

@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
-
 import pytest
 
-from requests import hooks
+from requests3 import hooks
 
 
 def hook(value):
@@ -10,13 +9,12 @@ def hook(value):
 
 
 @pytest.mark.parametrize(
-    'hooks_list, result', (
-        (hook, 'ata'),
-        ([hook, lambda x: None, hook], 'ta'),
-    )
+    'hooks_list, result', ((hook, 'ata'), ([hook, lambda x: None, hook], 'ta'))
 )
 def test_hooks(hooks_list, result):
-    assert hooks.dispatch_hook('response', {'response': hooks_list}, 'Data') == result
+    assert hooks.dispatch_hook(
+        'response', {'response': hooks_list}, 'Data'
+    ) == result
 
 
 def test_default_hooks():

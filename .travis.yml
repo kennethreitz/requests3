@@ -1,10 +1,19 @@
 language: python
+python:
+  # - "3.4"
+  # - "3.5"
+  - "3.6"
+  # - "3.7-dev"
+  # - "pypy"  -- appears to hang
+  # - "pypy3"
+matrix:
+  allow_failures:
+    - python: 3.7-dev
 # command to install dependencies
 install: "make"
 # command to run tests
 script:
-  - |
-    if [[ "$TRAVIS_PYTHON_VERSION" != "2.6" ]] ; then make test-readme; fi
+  - make test-readme
   - make ci
 cache: pip
 jobs:
@@ -34,7 +43,7 @@ jobs:
         - make test-readme
         - make ci
       python: '3.7'
-      dist: xenial   
+      dist: xenial
     - stage: coverage
       python: '3.6'
       script: codecov

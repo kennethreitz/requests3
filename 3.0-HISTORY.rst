@@ -1,0 +1,81 @@
+3.0.0 (2017-xx-xx)
+++++++++++++++++++
+
+- Support for Python 2.6 has been dropped.
+
+  - The ``OrderedDict`` import no longer exists in compat.py because it is part
+    of ``collections`` in Python 2.7 and newer.
+
+- Simplified logic for determining Content-Length and Transfer-Encoding.
+  Requests will now avoid setting both headers on the same request, and
+  raise an exception if this is done manually by a user.
+
+- Remove the HTTPProxyAuth class in favor of supporting proxy auth via
+  the proxies parameter.
+
+- Relax how Requests strips bodies from redirects. 3.0.0 only supports body
+  removal on 301/302 POST redirects and all 303 redirects.
+
+- Remove support for non-string/bytes parameters in ``_basic_auth_str``.
+
+- Prevent ``Session.merge_environment`` from erroneously setting the
+  ``verify`` parameter to ``None`` instead of ``True``.
+
+- Streaming responses with ``Response.iter_lines`` or ``Response.iter_content``
+  now requires an encoding to be set if one isn't provided by the server.
+
+- Exception raised during read timeout for ``Response.iter_content`` and
+  ``Response.iter_lines`` changed from ``ConnectionError`` to more
+  specific ``ReadTimeout``.
+
+- Raise exception if multiple locations are returned during a redirect.
+
+- Update ConnectionPool connections when TLS/SSL settings change.
+
+- Remove simplejson import and only use standard json module.
+
+- Strip surrounding whitespace from urls.
+
+- MissingSchema and InvalidSchema renamed to MissingScheme and InvalidScheme
+  respectively.
+
+- Change merge order for environment settings to avoid excluding Session-level
+  settings.
+
+- Encode redirect URIs as latin-1 before performing redirects in Python 3 to
+  avoid mangling during the requoting process.
+
+- Remove the ``__bool__`` and ``__nonzero__`` methods from a ``Response``
+  object.
+
+  This has been a planned feature for over a year. The behaviour is surprising
+  to most people and breaks most of the assumptions that people have about
+  Response objects. This resolves issue `#2002`_
+
+- Skip over empty chunks in iterators. Empty chunks could prematurely signal
+  the end of a request body's transmission, skipping them allows all of the
+  data through. See `#2631`_ for more details.
+
+- Rename the ``req`` argument from ``Session.resolve_redirects`` method
+  to ``request``.
+
+- Rename the ``resp`` argument from ``Session.resolve_redirects`` to
+  ``response``.
+
+- New ``PreparedRequest.send`` method. Now, you can
+  ``Request().prepare().send()``.
+
+- All porcelain API functions (e.g. ``requests.get``, etc) now accept an
+  optional ``session`` parameter. If provided, the session given will be used
+  for the request, in place of one being created for you.
+
+- URLs are now automatically stripped of leading/trailing whitespace.
+
+- ``Response.raise_for_status()`` now returns the response object for good responses
+
+- Use ``HTTPHeaderDict`` for response headers, allowing easier access to
+  individual values when multiple response headers are sent using the same
+  header name.
+
+.. _#2002: https://github.com/kennethreitz/requests/issues/2002
+.. _#2631: https://github.com/kennethreitz/requests/issues/2631

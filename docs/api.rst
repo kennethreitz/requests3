@@ -74,7 +74,6 @@ Authentication
 
 .. autoclass:: requests.auth.AuthBase
 .. autoclass:: requests.auth.HTTPBasicAuth
-.. autoclass:: requests.auth.HTTPProxyAuth
 .. autoclass:: requests.auth.HTTPDigestAuth
 
 
@@ -242,7 +241,7 @@ API Changes
       }
 
       # In requests 1.x, this was legal, in requests 2.x,
-      #  this raises requests.exceptions.MissingSchema
+      #  this raises requests.exceptions.MissingScheme
       requests.get("http://example.org", proxies=proxies)
 
 

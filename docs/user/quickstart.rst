@@ -388,9 +388,13 @@ But, since our ``status_code`` for ``r`` was ``200``, when we call
 ``raise_for_status()`` we get::
 
     >>> r.raise_for_status()
-    None
+    <Response [200]>
 
 All is well.
+
+.. note:: ``raise_for_status`` returns the response object for a successful response. This eases chaining in trivial cases, where we want bad codes to raise an exception, but use the response otherwise:
+
+    >>> value = requests.get('http://httpbin.org/ip').raise_for_status().json()['origin']
 
 
 Response Headers
@@ -430,6 +434,10 @@ represented in the dictionary within a single mapping, as per
     into one "field-name: field-value" pair, without changing the semantics
     of the message, by appending each subsequent field value to the combined
     field value in order, separated by a comma.
+
+If you do need to access each individual value sent with the same header, then
+you can use the ``getlist`` method to get a sequence of all the values returned
+for a particular header.
 
 Cookies
 -------

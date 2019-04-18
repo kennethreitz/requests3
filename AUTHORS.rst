@@ -157,16 +157,19 @@ Patches and Suggestions
 - Muhammad Yasoob Ullah Khalid <yasoob.khld@gmail.com> (`@yasoob <https://github.com/yasoob>`_)
 - Paul van der Linden (`@pvanderlinden <https://github.com/pvanderlinden>`_)
 - Colin Dickson (`@colindickson <https://github.com/colindickson>`_)
+- Sabari Kumar Murugesan (`@neosab <https://github.com/neosab>`_)
 - Smiley Barry (`@smiley <https://github.com/smiley>`_)
 - Shagun Sodhani (`@shagunsodhani <https://github.com/shagunsodhani>`_)
 - Robin Linderborg (`@vienno <https://github.com/vienno>`_)
 - Brian Samek (`@bsamek <https://github.com/bsamek>`_)
 - Dmitry Dygalo (`@Stranger6667 <https://github.com/Stranger6667>`_)
+- Tomáš Heger (`@geckon <https://github.com/geckon>`_)
 - piotrjurkiewicz
 - Jesse Shapiro <jesse@jesseshapiro.net> (`@haikuginger <https://github.com/haikuginger>`_)
 - Nate Prewitt <nate.prewitt@gmail.com> (`@nateprewitt <https://github.com/nateprewitt>`_)
 - Maik Himstedt
 - Michael Hunsinger
+- Jeremy Cline <jcline@redhat.com> (`@jeremycline <https://github.com/jeremycline>`_)
 - Brian Bamsch <bbamsch32@gmail.com> (`@bbamsch <https://github.com/bbamsch>`_)
 - Om Prakash Kumar <omprakash070@gmail.com> (`@iamprakashom <https://github.com/iamprakashom>`_)
 - Philipp Konrad <gardiac2002@gmail.com> (`@gardiac2002 <https://github.com/gardiac2002>`_)
@@ -180,12 +183,16 @@ Patches and Suggestions
 - Shmuel Amar (`@shmuelamar <https://github.com/shmuelamar>`_)
 - Gary Wu (`@garywu <https://github.com/garywu>`_)
 - Ryan Pineo (`@ryanpineo <https://github.com/ryanpineo>`_)
+<<<<<<< HEAD
 - Ed Morley (`@edmorley <https://github.com/edmorley>`_)
 - Matt Liu <liumatt@gmail.com> (`@mlcrazy <https://github.com/mlcrazy>`_)
 - Taylor Hoff <primdevs@protonmail.com> (`@PrimordialHelios <https://github.com/PrimordialHelios>`_)
+<<<<<<< HEAD
 - Arthur Vigil (`@ahvigil <https://github.com/ahvigil>`_)
 - Nehal J Wani (`@nehaljwani <https://github.com/nehaljwani>`_)
 - Demetrios Bairaktaris (`@DemetriosBairaktaris <https://github.com/demetriosbairaktaris>`_)
 - Darren Dormer (`@ddormer <https://github.com/ddormer>`_)
 - Rajiv Mayani (`@mayani <https://github.com/mayani>`_)
 - Antti Kaihola (`@akaihola <https://github.com/akaihola>`_)
+- Hugo van Kemenade (`@hugovk <https://github.com/hugovk>`_)
+- Allan Crooks (`@the-allanc <https://github.com/the-allanc>`_)

@@ -1,10 +1,18 @@
 .PHONY: docs
+core:
+	rm -fr requests3/core
+	git clone https://github.com/kennethreitz/requests-core
+	cd requests-core && python setup.py compile && cd ..
+	mv requests-core/requests_core requests3/core
+	rm -fr requests-core
 init:
 	pip install pipenv --upgrade
 	pipenv install --dev
 test:
 	# This runs all of the tests, on both Python 2 and Python 3.
-	detox
+	python setup.py test
+mypy:
+	python setup.py mypy
 ci:
 	pipenv run py.test -n 8 --boxed --junitxml=report.xml
 

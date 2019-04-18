@@ -1,7 +1,10 @@
 [[source]]
 url = "https://pypi.org/simple/"
+
+url = "https://pypi.python.org/simple"
 verify_ssl = true
 name = "pypi"
+
 
 [dev-packages]
 pytest = ">=2.8.0,<4.1"
@@ -22,3 +25,9 @@ httpbin = ">=0.7.0"
 
 [packages]
 "e1839a8" = {path = ".", editable = true, extras = ["socks"]}
+httpbin = "==0.5.0"
+pytest-mypy = {git = "https://github.com/petr-muller/pytest-mypy", editable = true, ref = "flush-errors"}
+white = {version="*"}
+mypy = "*"
+"rfc3986" = "*"
+twisted = {extras = ["tls"]}
