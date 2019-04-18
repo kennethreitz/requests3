@@ -5,7 +5,6 @@ name = "pypi"
 
 
 [dev-packages]
-pytest = ">=2.8.0,<4.1"
 codecov = "*"
 pytest-httpbin = ">=0.0.7"
 pytest-mock = "*"
@@ -20,12 +19,12 @@ docutils = "*"
 tox = "*"
 detox = "*"
 httpbin = ">=0.7.0"
-
-[packages]
+pytest = "*"
 "e1839a8" = {path = ".", editable = true, extras = ["socks"]}
-httpbin = "==0.5.0"
-pytest-mypy = {git = "https://github.com/petr-muller/pytest-mypy", editable = true, ref = "flush-errors"}
+pytest-mypy = "*"
 white = {version="*"}
 mypy = "*"
 "rfc3986" = "*"
 twisted = {extras = ["tls"]}
+
+[packages]
