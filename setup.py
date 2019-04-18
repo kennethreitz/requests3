@@ -71,7 +71,6 @@ if sys.argv[-1] == 'publish':
 packages = ['requests3']
 requires = [
     'chardet>=3.0.2,<3.1.0',
-<<<<<<< HEAD
     'idna>=2.5,<2.9',
     'urllib3>=1.21.1,<1.25',
     'certifi>=2017.4.17'
@@ -87,32 +86,10 @@ test_requirements = [
 ]
 
 about = {}
-with open(os.path.join(here, 'requests', '__version__.py'), 'r', 'utf-8') as f:
+with open(os.path.join(here, 'requests3', '__version__.py'), 'r', 'utf-8') as f:
     exec(f.read(), about)
 
 with open('README.md', 'r', 'utf-8') as f:
-=======
-    'idna>=2.5,<2.7',
-    'urllib3>=1.21.1,<1.23',
-    'certifi>=2017.4.17',
-    'rfc3986>=1.1.0<2',
-]
-test_requirements = [
-    'pytest-httpbin==0.0.7',
-    'pytest-cov',
-    'pytest-mock',
-    'pytest-xdist',
-    'PySocks>=1.5.6, !=1.5.7',
-    'pytest>=2.8.0',
-    'pytest-mypy',
-    'mypy',
-    'white',
-]
-about = {}
-with open(os.path.join(here, 'requests3', '__version__.py'), 'r', 'utf-8') as f:
-    exec (f.read(), about)
-with open('README.rst', 'r', 'utf-8') as f:
->>>>>>> 218d330150dbbe55f712296c2c39e0b4aa68b9a2
     readme = f.read()
 with open('HISTORY.md', 'r', 'utf-8') as f:
     history = f.read()
@@ -139,36 +116,19 @@ setup(
         'Natural Language :: English',
         'License :: OSI Approved :: Apache Software License',
         'Programming Language :: Python',
-<<<<<<< HEAD
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.7',
-=======
->>>>>>> 218d330150dbbe55f712296c2c39e0b4aa68b9a2
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.4',
-        'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: Implementation :: CPython',
-<<<<<<< HEAD
-        'Programming Language :: Python :: Implementation :: PyPy'
-    ],
-    cmdclass={'test': PyTest},
-=======
         'Programming Language :: Python :: Implementation :: PyPy',
-    ),
+    ],
     cmdclass={'test': PyTest, 'mypy': MyPyTest, 'format': Format},
->>>>>>> 218d330150dbbe55f712296c2c39e0b4aa68b9a2
     tests_require=test_requirements,
     extras_require={
         'security': ['pyOpenSSL >= 0.14', 'cryptography>=1.3.4', 'idna>=2.0.0'],
         'socks': ['PySocks>=1.5.6, !=1.5.7'],
-<<<<<<< HEAD
-        'socks:sys_platform == "win32" and python_version == "2.7"': ['win_inet_pton'],
-=======
         'socks:sys_platform == "win32" and python_version == "2.7"': [
             'win_inet_pton'
         ],
->>>>>>> 218d330150dbbe55f712296c2c39e0b4aa68b9a2
     },
 )

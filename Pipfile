@@ -20,10 +20,9 @@ tox = "*"
 detox = "*"
 httpbin = ">=0.7.0"
 pytest = "*"
-"e1839a8" = {path = ".", editable = true, extras = ["socks"]}
+"requests" = {path = ".", editable = true, extras = ["socks"]}
 pytest-mypy = "*"
 white = {version="*"}
-mypy = "*"
 "rfc3986" = "*"
 twisted = {extras = ["tls"]}
 
