@@ -9,5 +9,4 @@ jobs:
       - checkout
       - run: pip install --upgrade pipenv
       - run: pipenv install --sytem --dev
-      - test
       - run: python setup.py test
