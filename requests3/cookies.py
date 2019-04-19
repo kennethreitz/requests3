@@ -11,6 +11,7 @@ requests.utils imports from here, so be careful with imports.
 import copy
 import time
 import calendar
+from collections.abc import MutableMapping
 
 from ._internal_utils import to_native_string
 from .basics import cookielib, urlparse, urlunparse, Morsel

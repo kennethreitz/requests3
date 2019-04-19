@@ -12,12 +12,16 @@ import contextlib
 import io
 import os
 import re
+import cgi
 import socket
 import struct
 import sys
 import tempfile
 import warnings
 import typing
+import platform
+import zipfile
+from typing import Mapping
 
 from .__version__ import __version__
 from . import certs
@@ -35,7 +39,7 @@ from .basics import (
     basestring,
     integer_types,
     proxy_bypass_environment,
-    getproxies_environment,
+    getproxies_environment
 )
 from .cookies import cookiejar_from_dict
 from .structures import HTTPHeaderDict
@@ -49,6 +53,7 @@ from .exceptions import (
 
 NETRC_FILES = (".netrc", "_netrc")
 DEFAULT_CA_BUNDLE_PATH = certs.where()
+DEFAULT_PORTS = (80, 443)
 if platform.system() == "Windows":
 
     # provide a proxy_bypass version on Windows without DNS lookups

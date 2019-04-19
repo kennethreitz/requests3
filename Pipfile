@@ -3,7 +3,6 @@ url = "https://pypi.org/simple/"
 verify_ssl = true
 name = "pypi"
 
-
 [dev-packages]
 codecov = "*"
 pytest-httpbin = ">=0.0.7"
@@ -20,10 +19,8 @@ tox = "*"
 detox = "*"
 httpbin = ">=0.7.0"
 pytest = "*"
-"requests" = {path = ".", editable = true, extras = ["socks"]}
+requests = {path = ".",editable = true,extras = ["socks"]}
 pytest-mypy = "*"
-white = {version="*"}
+white = {version = "*"}
 "rfc3986" = "*"
 twisted = {extras = ["tls"]}
-
-[packages]
