@@ -1,0 +1,13 @@
+# Use the latest 2.1 version of CircleCI pipeline processing engine, see https://circleci.com/docs/2.0/configuration-reference/
+version: 2.1
+
+jobs:
+  build:
+    docker:
+      - image: circleci/python:3.6.2-stretch-browsers
+    steps:
+      - checkout
+      - run: pip install --upgrade pipenv
+      - run: pipenv install --sytem --dev
+      - test
+      - run: python setup.py test
