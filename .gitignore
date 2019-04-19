@@ -28,3 +28,4 @@ dist
 /.pytest_cache/
 
 /.tox/
+/.eggs/
