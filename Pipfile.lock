@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "20bb79af8e1c93904021d53336ecce1a0a9e5dedcd1d79e08439bf3f4d9681f9"
+            "sha256": "d16571af6a7c4058f9b33f1af783cc5f0a87de0a4c0badb2b925a19ab8996c69"
         },
         "pipfile-spec": 6,
         "requires": {},
@@ -354,6 +354,10 @@
             ],
             "index": "pypi",
             "version": "==0.7.0"
+        },
+        "httpcore": {
+            "git": "https://github.com/encode/httpcore.git",
+            "ref": "23252f6cd9e629ae7c513bc24a8c6a1061d61429"
         },
         "hyperlink": {
             "hashes": [

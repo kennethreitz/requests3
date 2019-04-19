@@ -24,3 +24,4 @@ pytest-mypy = "*"
 white = {version = "*"}
 "rfc3986" = "*"
 twisted = {extras = ["tls"]}
+httpcore = {git = "https://github.com/encode/httpcore.git"}
