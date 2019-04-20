@@ -9,7 +9,7 @@ from socket import error as SocketError
 import h11
 
 from .._collections import HTTPHeaderDict
-from ..exceptions import (ProtocolError, DecodeError, ReadTimeoutError)
+from ..exceptions import ProtocolError, DecodeError, ReadTimeoutError
 from ..packages.six import string_types as basestring, binary_type
 from ..util.ssl_ import BaseSSLError
 
@@ -17,7 +17,6 @@ log = logging.getLogger(__name__)
 
 
 class DeflateDecoder(object):
-
     def __init__(self):
         self._first_try = True
         self._data = binary_type()
@@ -52,7 +51,6 @@ class DeflateDecoder(object):
 
 
 class GzipDecoder(object):
-
     def __init__(self):
         self._obj = zlib.decompressobj(16 + zlib.MAX_WBITS)
 
@@ -67,7 +65,7 @@ class GzipDecoder(object):
 
 
 def _get_decoder(mode):
-    if mode == 'gzip':
+    if mode == "gzip":
         return GzipDecoder()
 
     return DeflateDecoder()
@@ -97,12 +95,13 @@ class HTTPResponse(io.IOBase):
         The retries contains the last :class:`~urllib3.util.retry.Retry` that
         was used during the request.
     """
-    CONTENT_DECODERS = ['gzip', 'deflate']
+
+    CONTENT_DECODERS = ["gzip", "deflate"]
     REDIRECT_STATUSES = [301, 302, 303, 307, 308]
 
     def __init__(
         self,
-        body='',
+        body="",
         headers=None,
         status=0,
         version=0,
@@ -131,7 +130,7 @@ class HTTPResponse(io.IOBase):
         self._fp = None
         self._original_response = original_response
         self._fp_bytes_read = 0
-        self._buffer = b''
+        self._buffer = b""
         if body and isinstance(body, (basestring, binary_type)):
             self._body = body
         else:
@@ -151,7 +150,7 @@ class HTTPResponse(io.IOBase):
             location. ``False`` if not a redirect status code.
         """
         if self.status in self.REDIRECT_STATUSES:
-            return self.headers.get('location')
+            return self.headers.get("location")
 
         return False
 
@@ -189,7 +188,7 @@ class HTTPResponse(io.IOBase):
         """
         # Note: content-encoding value should be case-insensitive, per RFC 7230
         # Section 3.2
-        content_encoding = self.headers.get('content-encoding', '').lower()
+        content_encoding = self.headers.get("content-encoding", "").lower()
         if self._decoder is None and content_encoding in self.CONTENT_DECODERS:
             self._decoder = _get_decoder(content_encoding)
 
@@ -201,7 +200,7 @@ class HTTPResponse(io.IOBase):
             if decode_content and self._decoder:
                 data = self._decoder.decompress(data)
         except (IOError, zlib.error) as e:
-            content_encoding = self.headers.get('content-encoding', '').lower()
+            content_encoding = self.headers.get("content-encoding", "").lower()
             raise DecodeError(
                 "Received response with content-encoding: %s, but "
                 "failed to decode it." % content_encoding,
@@ -218,10 +217,10 @@ class HTTPResponse(io.IOBase):
         being used.
         """
         if self._decoder:
-            buf = self._decoder.decompress(b'')
+            buf = self._decoder.decompress(b"")
             return buf + self._decoder.flush()
 
-        return b''
+        return b""
 
     @contextmanager
     def _error_catcher(self):
@@ -240,20 +239,20 @@ class HTTPResponse(io.IOBase):
             except SocketTimeout:
                 # FIXME: Ideally we'd like to include the url in the ReadTimeoutError but
                 # there is yet no clean way to get at it from this context.
-                raise ReadTimeoutError(self._pool, None, 'Read timed out.')
+                raise ReadTimeoutError(self._pool, None, "Read timed out.")
 
             except BaseSSLError as e:
                 # FIXME: Is there a better way to differentiate between SSLErrors?
-                if 'read operation timed out' not in str(e):  # Defensive:
+                if "read operation timed out" not in str(e):  # Defensive:
                     # This shouldn't happen but just in case we're missing an edge
                     # case, let's avoid swallowing SSL errors.
                     raise
 
-                raise ReadTimeoutError(self._pool, None, 'Read timed out.')
+                raise ReadTimeoutError(self._pool, None, "Read timed out.")
 
             except (h11.ProtocolError, SocketError) as e:
                 # This includes IncompleteRead.
-                raise ProtocolError('Connection broken: %r' % e, e)
+                raise ProtocolError("Connection broken: %r" % e, e)
 
             except GeneratorExit:
                 # We swallow GeneratorExit when it is emitted: this allows the
@@ -305,7 +304,7 @@ class HTTPResponse(io.IOBase):
         # data into the buffer. That's unfortunate, but right now I'm not smart
         # enough to come up with a way to solve that problem.
         if self._fp is None and not self._buffer:
-            return b''
+            return b""
 
         data = self._buffer
         with self._error_catcher():
@@ -313,8 +312,8 @@ class HTTPResponse(io.IOBase):
                 chunks = []
                 async for chunk in self.stream(decode_content):
                     chunks.append(chunk)
-                data += b''.join(chunks)
-                self._buffer = b''
+                data += b"".join(chunks)
+                self._buffer = b""
                 # We only cache the body data for simple read calls.
                 self._body = data
             else:
@@ -330,7 +329,7 @@ class HTTPResponse(io.IOBase):
                     else:
                         chunks.append(chunk)
                         data_len += len(chunk)
-                data = b''.join(chunks)
+                data = b"".join(chunks)
                 self._buffer = data[amt:]
                 data = data[:amt]
         return data
@@ -366,7 +365,7 @@ class HTTPResponse(io.IOBase):
             # coverage. Happily, the code here is so simple that testing the
             # branch we don't enter is basically entirely unnecessary (it's
             # just a yield statement).
-            final_chunk = self._decode(b'', decode_content, flush_decoder=True)
+            final_chunk = self._decode(b"", decode_content, flush_decoder=True)
             if final_chunk:  # Platform-specific: Jython
                 yield final_chunk
 
@@ -382,7 +381,7 @@ class HTTPResponse(io.IOBase):
         with ``original_response=r``.
         """
         # TODO: Huge hack.
-        for kw in ('redirect', 'assert_same_host', 'enforce_content_length'):
+        for kw in ("redirect", "assert_same_host", "enforce_content_length"):
             if kw in response_kw:
                 response_kw.pop(kw)
 
@@ -397,7 +396,6 @@ class HTTPResponse(io.IOBase):
         )
         return resp
 
-
     # Backwards-compatibility methods for httplib.HTTPResponse
     def getheaders(self):
         return self.headers
@@ -405,17 +403,15 @@ class HTTPResponse(io.IOBase):
     def getheader(self, name, default=None):
         return self.headers.get(name, default)
 
-
     # Backwards compatibility for http.cookiejar
     def info(self):
         return self.headers
-
 
     # Overrides from io.IOBase
     def close(self):
         if not self.closed:
             self._fp.close()
-            self._buffer = b''
+            self._buffer = b""
             self._fp = None
         if self._connection:
             self._connection.close()
@@ -426,7 +422,7 @@ class HTTPResponse(io.IOBase):
         if self._fp is None and not self._buffer:
             return True
 
-        elif hasattr(self._fp, 'complete'):
+        elif hasattr(self._fp, "complete"):
             return self._fp.complete
 
         else:
@@ -457,5 +453,5 @@ class HTTPResponse(io.IOBase):
             return 0
 
         else:
-            b[:len(temp)] = temp
+            b[: len(temp)] = temp
             return len(temp)

@@ -39,20 +39,21 @@ class SocketOptionsAdapter(adapters.HTTPAdapter):
     if connection is not None:
         default_options = getattr(
             connection.HTTPConnection,
-            'default_socket_options',
-            [(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)]
+            "default_socket_options",
+            [(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)],
         )
     else:
         default_options = []
-        warnings.warn(exc.RequestsVersionTooOld,
-                      "This version of Requests is only compatible with a "
-                      "version of urllib3 which is too old to support "
-                      "setting options on a socket. This adapter is "
-                      "functionally useless.")
+        warnings.warn(
+            exc.RequestsVersionTooOld,
+            "This version of Requests is only compatible with a "
+            "version of urllib3 which is too old to support "
+            "setting options on a socket. This adapter is "
+            "functionally useless.",
+        )
 
     def __init__(self, **kwargs):
-        self.socket_options = kwargs.pop('socket_options',
-                                         self.default_options)
+        self.socket_options = kwargs.pop("socket_options", self.default_options)
 
         super(SocketOptionsAdapter, self).__init__(**kwargs)
 
@@ -63,7 +64,7 @@ class SocketOptionsAdapter(adapters.HTTPAdapter):
                 num_pools=connections,
                 maxsize=maxsize,
                 block=block,
-                socket_options=self.socket_options
+                socket_options=self.socket_options,
             )
         else:
             super(SocketOptionsAdapter, self).init_poolmanager(
@@ -98,30 +99,28 @@ class TCPKeepAliveAdapter(SocketOptionsAdapter):
     """
 
     def __init__(self, **kwargs):
-        socket_options = kwargs.pop('socket_options',
-                                    SocketOptionsAdapter.default_options)
-        idle = kwargs.pop('idle', 60)
-        interval = kwargs.pop('interval', 20)
-        count = kwargs.pop('count', 5)
-        socket_options = socket_options + [
-            (socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
-        ]
+        socket_options = kwargs.pop(
+            "socket_options", SocketOptionsAdapter.default_options
+        )
+        idle = kwargs.pop("idle", 60)
+        interval = kwargs.pop("interval", 20)
+        count = kwargs.pop("count", 5)
+        socket_options = socket_options + [(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)]
 
         # NOTE(Ian): OSX does not have these constants defined, so we
         # set them conditionally.
-        if getattr(socket, 'TCP_KEEPINTVL', None) is not None:
-            socket_options += [(socket.IPPROTO_TCP, socket.TCP_KEEPINTVL,
-                                interval)]
-        elif sys.platform == 'darwin':
+        if getattr(socket, "TCP_KEEPINTVL", None) is not None:
+            socket_options += [(socket.IPPROTO_TCP, socket.TCP_KEEPINTVL, interval)]
+        elif sys.platform == "darwin":
             # On OSX, TCP_KEEPALIVE from netinet/tcp.h is not exported
             # by python's socket module
-            TCP_KEEPALIVE = getattr(socket, 'TCP_KEEPALIVE', 0x10)
+            TCP_KEEPALIVE = getattr(socket, "TCP_KEEPALIVE", 0x10)
             socket_options += [(socket.IPPROTO_TCP, TCP_KEEPALIVE, interval)]
 
-        if getattr(socket, 'TCP_KEEPCNT', None) is not None:
+        if getattr(socket, "TCP_KEEPCNT", None) is not None:
             socket_options += [(socket.IPPROTO_TCP, socket.TCP_KEEPCNT, count)]
 
-        if getattr(socket, 'TCP_KEEPIDLE', None) is not None:
+        if getattr(socket, "TCP_KEEPIDLE", None) is not None:
             socket_options += [(socket.IPPROTO_TCP, socket.TCP_KEEPIDLE, idle)]
 
         super(TCPKeepAliveAdapter, self).__init__(

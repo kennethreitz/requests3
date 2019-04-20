@@ -5,17 +5,13 @@ import sys
 
 from requests import utils
 
-find_charset = re.compile(
-    br'<meta.*?charset=["\']*(.+?)["\'>]', flags=re.I
-).findall
+find_charset = re.compile(br'<meta.*?charset=["\']*(.+?)["\'>]', flags=re.I).findall
 
 find_pragma = re.compile(
     br'<meta.*?content=["\']*;?charset=(.+?)["\'>]', flags=re.I
 ).findall
 
-find_xml = re.compile(
-    br'^<\?xml.*?encoding=["\']*(.+?)["\'>]'
-).findall
+find_xml = re.compile(br'^<\?xml.*?encoding=["\']*(.+?)["\'>]').findall
 
 
 def get_encodings_from_content(content):
@@ -34,10 +30,9 @@ def get_encodings_from_content(content):
     :return: encodings detected in the provided content
     :rtype: list(str)
     """
-    encodings = (find_charset(content) + find_pragma(content)
-                 + find_xml(content))
+    encodings = find_charset(content) + find_pragma(content) + find_xml(content)
     if (3, 0) <= sys.version_info < (4, 0):
-        encodings = [encoding.decode('utf8') for encoding in encodings]
+        encodings = [encoding.decode("utf8") for encoding in encodings]
     return encodings
 
 
@@ -85,7 +80,7 @@ def get_unicode_from_response(response):
     # Fall back:
     if encoding:
         try:
-            return str(response.content, encoding, errors='replace')
+            return str(response.content, encoding, errors="replace")
         except TypeError:
             pass
     return response.text

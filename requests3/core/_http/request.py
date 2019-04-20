@@ -4,7 +4,7 @@ from .filepost import encode_multipart_formdata
 from .packages import six
 from .packages.six.moves.urllib.parse import urlencode
 
-__all__ = ['RequestMethods']
+__all__ = ["RequestMethods"]
 
 
 class RequestMethods(object):
@@ -35,7 +35,8 @@ class RequestMethods(object):
         Headers to include with all requests, unless other headers are given
         explicitly.
     """
-    _encode_url_methods = set(['DELETE', 'GET', 'HEAD', 'OPTIONS'])
+
+    _encode_url_methods = set(["DELETE", "GET", "HEAD", "OPTIONS"])
 
     def __init__(self, headers=None):
         self.headers = headers or {}
@@ -77,19 +78,17 @@ class RequestMethods(object):
                 method, url, fields=fields, headers=headers, **urlopen_kw
             )
 
-    def request_encode_url(
-        self, method, url, fields=None, headers=None, **urlopen_kw
-    ):
+    def request_encode_url(self, method, url, fields=None, headers=None, **urlopen_kw):
         """
         Make a request using :meth:`urlopen` with the ``fields`` encoded in
         the url. This is useful for request methods like GET, HEAD, DELETE, etc.
         """
         if headers is None:
             headers = self.headers
-        extra_kw = {'headers': headers}
+        extra_kw = {"headers": headers}
         extra_kw.update(urlopen_kw)
         if fields:
-            url += '?' + urlencode(fields)
+            url += "?" + urlencode(fields)
         return self.urlopen(method, url, **extra_kw)
 
     def request_encode_body(
@@ -139,9 +138,9 @@ class RequestMethods(object):
         """
         if headers is None:
             headers = self.headers
-        extra_kw = {'headers': {}}
+        extra_kw = {"headers": {}}
         if fields:
-            if 'body' in urlopen_kw:
+            if "body" in urlopen_kw:
                 raise TypeError(
                     "request got values for both 'fields' and 'body', can only specify one."
                 )
@@ -151,13 +150,14 @@ class RequestMethods(object):
                     fields, boundary=multipart_boundary
                 )
             else:
-                body, content_type = urlencode(
-                    fields
-                ), 'application/x-www-form-urlencoded'
+                body, content_type = (
+                    urlencode(fields),
+                    "application/x-www-form-urlencoded",
+                )
             if isinstance(body, six.text_type):
-                body = body.encode('utf-8')
-            extra_kw['body'] = body
-            extra_kw['headers'] = {'Content-Type': content_type}
-        extra_kw['headers'].update(headers)
+                body = body.encode("utf-8")
+            extra_kw["body"] = body
+            extra_kw["headers"] = {"Content-Type": content_type}
+        extra_kw["headers"].update(headers)
         extra_kw.update(urlopen_kw)
         return self.urlopen(method, url, **extra_kw)

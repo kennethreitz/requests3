@@ -1,7 +1,6 @@
 from __future__ import absolute_import
 
 
-
 # Base Exceptions
 class HTTPError(Exception):
     "Base exception used by this module."
@@ -74,14 +73,13 @@ class MaxRetryError(RequestError):
 
     def __init__(self, pool, url, reason=None):
         self.reason = reason
-        message = "Max retries exceeded with url: %s (Caused by %r)" % (
-            url, reason
-        )
+        message = "Max retries exceeded with url: %s (Caused by %r)" % (url, reason)
         RequestError.__init__(self, pool, url, message)
 
 
 class TimeoutStateError(HTTPError):
     """ Raised when passing an invalid state to a timeout """
+
     pass
 
 
@@ -91,14 +89,13 @@ class TimeoutError(HTTPError):
     Catching this error will catch both :exc:`ReadTimeoutErrors
     <ReadTimeoutError>` and :exc:`ConnectTimeoutErrors <ConnectTimeoutError>`.
     """
+
     pass
 
 
 class ReadTimeoutError(TimeoutError, RequestError):
     "Raised when a socket timeout occurs while receiving data from a server"
     pass
-
-
 
 
 # This timeout error does not have a URL attached and needs to inherit from the
@@ -139,8 +136,8 @@ class LocationParseError(LocationValueError):
 
 class ResponseError(HTTPError):
     "Used as a container for an error reason supplied in a MaxRetryError."
-    GENERIC_ERROR = 'too many error responses'
-    SPECIFIC_ERROR = 'too many {status_code} error responses'
+    GENERIC_ERROR = "too many error responses"
+    SPECIFIC_ERROR = "too many {status_code} error responses"
 
 
 class SecurityWarning(HTTPWarning):
@@ -178,6 +175,7 @@ class DependencyWarning(HTTPWarning):
     Warned when an attempt is made to import a module with missing optional
     dependencies.
     """
+
     pass
 
 
@@ -209,9 +207,7 @@ class HeaderParsingError(HTTPError):
     "Raised by assert_header_parsing, but we convert it to a log.warning statement."
 
     def __init__(self, defects, unparsed_data):
-        message = '%s, unparsed data: %r' % (
-            defects or 'Unknown', unparsed_data
-        )
+        message = "%s, unparsed data: %r" % (defects or "Unknown", unparsed_data)
         super(HeaderParsingError, self).__init__(message)
 
 
@@ -235,4 +231,5 @@ class InvalidBodyError(HTTPError):
     An attempt was made to send a request with a body object that urllib3 does
     not support.
     """
+
     pass

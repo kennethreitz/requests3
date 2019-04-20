@@ -16,7 +16,8 @@ class HTTPProxyDigestAuth(auth.HTTPDigestAuth):
         new username and password. i.e., retry build_digest_header
     :type stale_rejects: int
     """
-    _pat = re.compile(r'digest ', flags=re.IGNORECASE)
+
+    _pat = re.compile(r"digest ", flags=re.IGNORECASE)
 
     def __init__(self, *args, **kwargs):
         super(HTTPProxyDigestAuth, self).__init__(*args, **kwargs)
@@ -26,14 +27,14 @@ class HTTPProxyDigestAuth(auth.HTTPDigestAuth):
 
     @property
     def stale_rejects(self):
-        thread_local = getattr(self, '_thread_local', None)
+        thread_local = getattr(self, "_thread_local", None)
         if thread_local is None:
             return self._stale_rejects
         return thread_local.stale_rejects
 
     @stale_rejects.setter
     def stale_rejects(self, value):
-        thread_local = getattr(self, '_thread_local', None)
+        thread_local = getattr(self, "_thread_local", None)
         if thread_local is None:
             self._stale_rejects = value
         else:
@@ -57,21 +58,20 @@ class HTTPProxyDigestAuth(auth.HTTPDigestAuth):
             if s_auth is None:
                 raise IOError(
                     "proxy server violated RFC 7235:"
-                    "407 response MUST contain header proxy-authenticate")
+                    "407 response MUST contain header proxy-authenticate"
+                )
             elif not self._pat.match(s_auth):
                 return r
 
-            self.chal = utils.parse_dict_header(
-                self._pat.sub('', s_auth, count=1))
+            self.chal = utils.parse_dict_header(self._pat.sub("", s_auth, count=1))
 
             # if we present the user/passwd and still get rejected
             # https://tools.ietf.org/html/rfc2617#section-3.2.1
-            if ('Proxy-Authorization' in r.request.headers and
-                    'stale' in self.chal):
-                if self.chal['stale'].lower() == 'true':  # try again
+            if "Proxy-Authorization" in r.request.headers and "stale" in self.chal:
+                if self.chal["stale"].lower() == "true":  # try again
                     self.stale_rejects += 1
                 # wrong user/passwd
-                elif self.chal['stale'].lower() == 'false':
+                elif self.chal["stale"].lower() == "false":
                     raise IOError("User or password is invalid")
 
             # Consume content and release the original connection
@@ -82,8 +82,9 @@ class HTTPProxyDigestAuth(auth.HTTPDigestAuth):
             cookies.extract_cookies_to_jar(prep._cookies, r.request, r.raw)
             prep.prepare_cookies(prep._cookies)
 
-            prep.headers['Proxy-Authorization'] = self.build_digest_header(
-                prep.method, prep.url)
+            prep.headers["Proxy-Authorization"] = self.build_digest_header(
+                prep.method, prep.url
+            )
             _r = r.connection.send(prep, **kwargs)
             _r.history.append(r)
             _r.request = prep
@@ -96,8 +97,6 @@ class HTTPProxyDigestAuth(auth.HTTPDigestAuth):
         self.init_per_thread_state()
         # if we have nonce, then just use it, otherwise server will tell us
         if self.last_nonce:
-            r.headers['Proxy-Authorization'] = self.build_digest_header(
-                r.method, r.url
-            )
-        r.register_hook('response', self.handle_407)
+            r.headers["Proxy-Authorization"] = self.build_digest_header(r.method, r.url)
+        r.register_hook("response", self.handle_407)
         return r

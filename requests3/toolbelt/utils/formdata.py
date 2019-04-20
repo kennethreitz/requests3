@@ -4,7 +4,7 @@ from .._compat import basestring
 from .._compat import urlencode as _urlencode
 
 
-__all__ = ('urlencode',)
+__all__ = ("urlencode",)
 
 
 def urlencode(query, *args, **kwargs):
@@ -76,8 +76,10 @@ def urlencode(query, *args, **kwargs):
     original_query_list = _to_kv_list(query)
 
     if not all(_is_two_tuple(i) for i in original_query_list):
-        raise ValueError("Expected query to be able to be converted to a "
-                         "list comprised of length 2 tuples.")
+        raise ValueError(
+            "Expected query to be able to be converted to a "
+            "list comprised of length 2 tuples."
+        )
 
     query_list = original_query_list
     while any(isinstance(v, expand_classes) for _, v in query_list):
@@ -87,7 +89,7 @@ def urlencode(query, *args, **kwargs):
 
 
 def _to_kv_list(dict_or_list):
-    if hasattr(dict_or_list, 'items'):
+    if hasattr(dict_or_list, "items"):
         return list(dict_or_list.items())
     return dict_or_list
 
@@ -102,7 +104,7 @@ def _expand_query_values(original_query_list):
         if isinstance(value, basestring):
             query_list.append((key, value))
         else:
-            key_fmt = key + '[%s]'
+            key_fmt = key + "[%s]"
             value_list = _to_kv_list(value)
             query_list.extend((key_fmt % k, v) for k, v in value_list)
     return query_list

@@ -31,9 +31,9 @@ except ImportError:
 
     warnings.warn(
         (
-            'SOCKS support in urllib3 requires the installation of optional '
-            'dependencies: specifically, PySocks.  For more information, see '
-            'https://urllib3.readthedocs.io/en/latest/contrib.html#socks-proxies'
+            "SOCKS support in urllib3 requires the installation of optional "
+            "dependencies: specifically, PySocks.  For more information, see "
+            "https://urllib3.readthedocs.io/en/latest/contrib.html#socks-proxies"
         ),
         DependencyWarning,
     )
@@ -41,8 +41,8 @@ except ImportError:
 
 from socket import error as SocketError, timeout as SocketTimeout
 
-from .._sync.connection import (HTTP1Connection)
-from ..connectionpool import (HTTPConnectionPool, HTTPSConnectionPool)
+from .._sync.connection import HTTP1Connection
+from ..connectionpool import HTTPConnectionPool, HTTPSConnectionPool
 from ..exceptions import ConnectTimeoutError, NewConnectionError
 from ..poolmanager import PoolManager
 from ..util.url import parse_url
@@ -54,7 +54,7 @@ class SOCKSConnection(HTTP1Connection):
     """
 
     def __init__(self, *args, **kwargs):
-        self._socks_options = kwargs.pop('_socks_options')
+        self._socks_options = kwargs.pop("_socks_options")
         super(SOCKSConnection, self).__init__(*args, **kwargs)
 
     def _do_socket_connect(self, connect_timeout, connect_kw):
@@ -64,20 +64,20 @@ class SOCKSConnection(HTTP1Connection):
         try:
             conn = socks.create_connection(
                 (self._host, self._port),
-                proxy_type=self._socks_options['socks_version'],
-                proxy_addr=self._socks_options['proxy_host'],
-                proxy_port=self._socks_options['proxy_port'],
-                proxy_username=self._socks_options['username'],
-                proxy_password=self._socks_options['password'],
-                proxy_rdns=self._socks_options['rdns'],
+                proxy_type=self._socks_options["socks_version"],
+                proxy_addr=self._socks_options["proxy_host"],
+                proxy_port=self._socks_options["proxy_port"],
+                proxy_username=self._socks_options["username"],
+                proxy_password=self._socks_options["password"],
+                proxy_rdns=self._socks_options["rdns"],
                 timeout=connect_timeout,
                 **connect_kw
             )
         except SocketTimeout as e:
             raise ConnectTimeoutError(
                 self,
-                "Connection to %s timed out. (connect timeout=%s)" %
-                (self._host, connect_timeout),
+                "Connection to %s timed out. (connect timeout=%s)"
+                % (self._host, connect_timeout),
             )
 
         except socks.ProxyError as e:
@@ -88,14 +88,13 @@ class SOCKSConnection(HTTP1Connection):
                 if isinstance(error, SocketTimeout):
                     raise ConnectTimeoutError(
                         self,
-                        "Connection to %s timed out. (connect timeout=%s)" %
-                        (self._host, connect_timeout),
+                        "Connection to %s timed out. (connect timeout=%s)"
+                        % (self._host, connect_timeout),
                     )
 
                 else:
                     raise NewConnectionError(
-                        self,
-                        "Failed to establish a new connection: %s" % error,
+                        self, "Failed to establish a new connection: %s" % error
                     )
 
             else:
@@ -124,8 +123,10 @@ class SOCKSProxyManager(PoolManager):
     A version of the urllib3 ProxyManager that routes connections via the
     defined SOCKS proxy.
     """
+
     pool_classes_by_scheme = {
-        'http': SOCKSHTTPConnectionPool, 'https': SOCKSHTTPSConnectionPool
+        "http": SOCKSHTTPConnectionPool,
+        "https": SOCKSHTTPSConnectionPool,
     }
 
     def __init__(
@@ -138,33 +139,31 @@ class SOCKSProxyManager(PoolManager):
         **connection_pool_kw
     ):
         parsed = parse_url(proxy_url)
-        if parsed.scheme == 'socks5':
+        if parsed.scheme == "socks5":
             socks_version = socks.PROXY_TYPE_SOCKS5
             rdns = False
-        elif parsed.scheme == 'socks5h':
+        elif parsed.scheme == "socks5h":
             socks_version = socks.PROXY_TYPE_SOCKS5
             rdns = True
-        elif parsed.scheme == 'socks4':
+        elif parsed.scheme == "socks4":
             socks_version = socks.PROXY_TYPE_SOCKS4
             rdns = False
-        elif parsed.scheme == 'socks4a':
+        elif parsed.scheme == "socks4a":
             socks_version = socks.PROXY_TYPE_SOCKS4
             rdns = True
         else:
-            raise ValueError(
-                "Unable to determine SOCKS version from %s" % proxy_url
-            )
+            raise ValueError("Unable to determine SOCKS version from %s" % proxy_url)
 
         self.proxy_url = proxy_url
         socks_options = {
-            'socks_version': socks_version,
-            'proxy_host': parsed.host,
-            'proxy_port': parsed.port,
-            'username': username,
-            'password': password,
-            'rdns': rdns,
+            "socks_version": socks_version,
+            "proxy_host": parsed.host,
+            "proxy_port": parsed.port,
+            "username": username,
+            "password": password,
+            "rdns": rdns,
         }
-        connection_pool_kw['_socks_options'] = socks_options
+        connection_pool_kw["_socks_options"] = socks_options
         super(SOCKSProxyManager, self).__init__(
             num_pools, headers, **connection_pool_kw
         )

@@ -3,18 +3,19 @@ from collections import namedtuple
 
 from ..exceptions import LocationParseError
 
-url_attrs = ['scheme', 'auth', 'host', 'port', 'path', 'query', 'fragment']
+url_attrs = ["scheme", "auth", "host", "port", "path", "query", "fragment"]
 # We only want to normalize urls with an HTTP(S) scheme.
 # urllib3 infers URLs without a scheme (None) to be http.
-NORMALIZABLE_SCHEMES = ('http', 'https', None)
+NORMALIZABLE_SCHEMES = ("http", "https", None)
 
 
-class Url(namedtuple('Url', url_attrs)):
+class Url(namedtuple("Url", url_attrs)):
     """
     Datastructure for representing an HTTP URL. Used as a return value for
     :func:`parse_url`. Both the scheme and host are normalized as they are
     both case-insensitive according to RFC 3986.
     """
+
     __slots__ = ()
 
     def __new__(
@@ -27,8 +28,8 @@ class Url(namedtuple('Url', url_attrs)):
         query=None,
         fragment=None,
     ):
-        if path and not path.startswith('/'):
-            path = '/' + path
+        if path and not path.startswith("/"):
+            path = "/" + path
         if scheme:
             scheme = scheme.lower()
         if host and scheme in NORMALIZABLE_SCHEMES:
@@ -45,16 +46,16 @@ class Url(namedtuple('Url', url_attrs)):
     @property
     def request_uri(self):
         """Absolute path including the query string."""
-        uri = self.path or '/'
+        uri = self.path or "/"
         if self.query is not None:
-            uri += '?' + self.query
+            uri += "?" + self.query
         return uri
 
     @property
     def netloc(self):
         """Network location including host and port"""
         if self.port:
-            return '%s:%d' % (self.host, self.port)
+            return "%s:%d" % (self.host, self.port)
 
         return self.host
 
@@ -78,22 +79,22 @@ class Url(namedtuple('Url', url_attrs)):
             'http://username:password@host.com:80/path?query#fragment'
         """
         scheme, auth, host, port, path, query, fragment = self
-        url = ''
+        url = ""
         # We use "is not None" we want things to happen with empty strings (or 0 port)
         if scheme is not None:
-            url += scheme + '://'
+            url += scheme + "://"
         if auth is not None:
-            url += auth + '@'
+            url += auth + "@"
         if host is not None:
             url += host
         if port is not None:
-            url += ':' + str(port)
+            url += ":" + str(port)
         if path is not None:
             url += path
         if query is not None:
-            url += '?' + query
+            url += "?" + query
         if fragment is not None:
-            url += '#' + fragment
+            url += "#" + fragment
         return url
 
     def __str__(self):
@@ -127,9 +128,9 @@ def split_first(s, delims):
             min_idx = idx
             min_delim = d
     if min_idx is None or min_idx < 0:
-        return s, '', None
+        return s, "", None
 
-    return s[:min_idx], s[min_idx + 1:], min_delim
+    return s[:min_idx], s[min_idx + 1 :], min_delim
 
 
 def parse_url(url):
@@ -164,25 +165,25 @@ def parse_url(url):
     fragment = None
     query = None
     # Scheme
-    if '://' in url:
-        scheme, url = url.split('://', 1)
+    if "://" in url:
+        scheme, url = url.split("://", 1)
     # Find the earliest Authority Terminator
     # (http://tools.ietf.org/html/rfc3986#section-3.2)
-    url, path_, delim = split_first(url, ['/', '?', '#'])
+    url, path_, delim = split_first(url, ["/", "?", "#"])
     if delim:
         # Reassemble the path
         path = delim + path_
     # Auth
-    if '@' in url:
+    if "@" in url:
         # Last '@' denotes end of auth part
-        auth, url = url.rsplit('@', 1)
+        auth, url = url.rsplit("@", 1)
     # IPv6
-    if url and url[0] == '[':
-        host, url = url.split(']', 1)
-        host += ']'
+    if url and url[0] == "[":
+        host, url = url.split("]", 1)
+        host += "]"
     # Port
-    if ':' in url:
-        _host, port = url.split(':', 1)
+    if ":" in url:
+        _host, port = url.split(":", 1)
         if not host:
             host = _host
         if port:
@@ -205,11 +206,11 @@ def parse_url(url):
         return Url(scheme, auth, host, port, path, query, fragment)
 
     # Fragment
-    if '#' in path:
-        path, fragment = path.split('#', 1)
+    if "#" in path:
+        path, fragment = path.split("#", 1)
     # Query
-    if '?' in path:
-        path, query = path.split('?', 1)
+    if "?" in path:
+        path, query = path.split("?", 1)
     return Url(scheme, auth, host, port, path, query, fragment)
 
 
@@ -218,4 +219,4 @@ def get_host(url):
     Deprecated. Use :func:`parse_url` instead.
     """
     p = parse_url(url)
-    return p.scheme or 'http', p.hostname, p.port
+    return p.scheme or "http", p.hostname, p.port

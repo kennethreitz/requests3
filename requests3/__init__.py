@@ -138,7 +138,6 @@ logging.getLogger(__name__).addHandler(NullHandler())
 warnings.simplefilter("default", FileModeWarning, append=True)
 
 
-
 # -*- coding: utf-8 -*-
 """
 requests.api
@@ -214,6 +213,7 @@ def get(url: types.URL, *, params: types.Params = None, **kwargs) -> types.Respo
     """
     kwargs.setdefault("allow_redirects", True)
     return request("get", url, params=params, **kwargs)
+
 
 def head(url: types.URL, **kwargs) -> types.Response:
     r"""Sends a HEAD request.

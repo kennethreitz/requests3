@@ -82,7 +82,7 @@ def map(requests, **kwargs):
         :class:`~requests_toolbelt.threaded.pool.ThreadException`)
     """
     if not (requests and all(isinstance(r, dict) for r in requests)):
-        raise ValueError('map expects a list of dictionaries.')
+        raise ValueError("map expects a list of dictionaries.")
 
     # Build our queue of requests
     job_queue = queue.Queue()
@@ -90,7 +90,7 @@ def map(requests, **kwargs):
         job_queue.put(request)
 
     # Ensure the user doesn't try to pass their own job_queue
-    kwargs['job_queue'] = job_queue
+    kwargs["job_queue"] = job_queue
 
     threadpool = pool.Pool(**kwargs)
     threadpool.join_all()

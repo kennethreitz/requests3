@@ -10,8 +10,6 @@ def is_connection_dropped(conn):  # Platform-specific
     return conn.is_dropped()
 
 
-
-
 # This function is copied from socket.py in the Python 2.7 standard
 # library test suite. Added to its signature is only `socket_options`.
 # One additional modification is that we avoid binding to IPv6 servers
@@ -34,8 +32,8 @@ def create_connection(
     An host of '' or port 0 tells the OS to use the default.
     """
     host, port = address
-    if host.startswith('['):
-        host = host.strip('[]')
+    if host.startswith("["):
+        host = host.strip("[]")
     err = None
     # Using the value from allowed_gai_family() in the context of getaddrinfo lets
     # us select whether to work with IPv4 DNS records, IPv6 records, or both.
@@ -105,4 +103,4 @@ def _has_ipv6(host):
     return has_ipv6
 
 
-HAS_IPV6 = _has_ipv6('::1')
+HAS_IPV6 = _has_ipv6("::1")

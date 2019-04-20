@@ -13,7 +13,6 @@ BUFSIZE = 65536
 
 
 class SyncBackend(object):
-
     def __init__(self, connect_timeout=None, read_timeout=None):
         self._connect_timeout = connect_timeout
         self._read_timeout = read_timeout
@@ -29,7 +28,6 @@ class SyncBackend(object):
 
 
 class SyncSocket(object):
-
     def __init__(self, sock, read_timeout):
         self._sock = sock
         self._read_timeout = read_timeout
@@ -40,13 +38,10 @@ class SyncSocket(object):
     def start_tls(self, server_hostname, ssl_context):
         self._sock.setblocking(True)
         wrapped = ssl_wrap_socket(
-            self._sock,
-            server_hostname=server_hostname,
-            ssl_context=ssl_context,
+            self._sock, server_hostname=server_hostname, ssl_context=ssl_context
         )
         wrapped.setblocking(False)
         return SyncSocket(wrapped, self._read_timeout)
-
 
     # Only for SSL-wrapped sockets
     def getpeercert(self, binary=False):

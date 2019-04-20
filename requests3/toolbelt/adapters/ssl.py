@@ -43,7 +43,7 @@ class SSLAdapter(HTTPAdapter):
     properly when used with proxies.
     """
 
-    __attrs__ = HTTPAdapter.__attrs__ + ['ssl_version']
+    __attrs__ = HTTPAdapter.__attrs__ + ["ssl_version"]
 
     def __init__(self, ssl_version=None, **kwargs):
         self.ssl_version = ssl_version
@@ -55,12 +55,13 @@ class SSLAdapter(HTTPAdapter):
             num_pools=connections,
             maxsize=maxsize,
             block=block,
-            ssl_version=self.ssl_version)
+            ssl_version=self.ssl_version,
+        )
 
     if requests.__build__ >= 0x020400:
         # Earlier versions of requests either don't have this method or, worse,
         # don't allow passing arbitrary keyword arguments. As a result, only
         # conditionally define this method.
         def proxy_manager_for(self, *args, **kwargs):
-            kwargs['ssl_version'] = self.ssl_version
+            kwargs["ssl_version"] = self.ssl_version
             return super(SSLAdapter, self).proxy_manager_for(*args, **kwargs)

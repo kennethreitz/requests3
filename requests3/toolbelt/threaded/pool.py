@@ -24,8 +24,14 @@ class Pool(object):
     :type session: requests.Session
     """
 
-    def __init__(self, job_queue, initializer=None, auth_generator=None,
-                 num_processes=None, session=requests.Session):
+    def __init__(
+        self,
+        job_queue,
+        initializer=None,
+        auth_generator=None,
+        num_processes=None,
+        session=requests.Session,
+    ):
         if num_processes is None:
             num_processes = multiprocessing.cpu_count() or 1
 
@@ -40,8 +46,12 @@ class Pool(object):
         self._auth = auth_generator or _identity
         self._session = session
         self._pool = [
-            thread.SessionThread(self._new_session(), self._job_queue,
-                                 self._response_queue, self._exc_queue)
+            thread.SessionThread(
+                self._new_session(),
+                self._job_queue,
+                self._response_queue,
+                self._exc_queue,
+            )
             for _ in range(self._processes)
         ]
 
@@ -85,12 +95,12 @@ class Pool(object):
         :returns: An initialized :class:`~Pool` object.
         :rtype: :class:`~Pool`
         """
-        request_dict = {'method': 'GET'}
+        request_dict = {"method": "GET"}
         request_dict.update(request_kwargs or {})
         job_queue = queue.Queue()
         for url in urls:
             job = request_dict.copy()
-            job.update({'url': url})
+            job.update({"url": url})
             job_queue.put(job)
 
         return cls(job_queue=job_queue, **kwargs)
@@ -172,8 +182,9 @@ class ThreadResponse(ThreadProxy):
         json = thread_response.json()
 
     """
-    proxied_attr = 'response'
-    attrs = frozenset(['request_kwargs', 'response'])
+
+    proxied_attr = "response"
+    attrs = frozenset(["request_kwargs", "response"])
 
     def __init__(self, request_kwargs, response):
         #: The original keyword arguments provided to the queue
@@ -194,8 +205,9 @@ class ThreadException(ThreadProxy):
         msg = thread_exc.message
 
     """
-    proxied_attr = 'exception'
-    attrs = frozenset(['request_kwargs', 'exception'])
+
+    proxied_attr = "exception"
+    attrs = frozenset(["request_kwargs", "exception"])
 
     def __init__(self, request_kwargs, exception):
         #: The original keyword arguments provided to the queue
@@ -208,4 +220,4 @@ def _identity(session_obj):
     return session_obj
 
 
-__all__ = ['ThreadException', 'ThreadResponse', 'Pool']
+__all__ = ["ThreadException", "ThreadResponse", "Pool"]

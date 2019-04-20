@@ -14,7 +14,7 @@ from typing import (
     Dict,
 )
 
-from .import http_auth as auth
+from . import http_auth as auth
 from .http_models import Response, PreparedRequest
 from .http_cookies import RequestsCookieJar
 from .http_sessions import Session
@@ -50,10 +50,7 @@ Headers = Optional[Union[None, MutableMapping[Text, Text]]]
 Cookies = Optional[Union[None, RequestsCookieJar, MutableMapping[Text, Text]]]
 Files = Optional[MutableMapping[Text, IO]]
 Auth = Union[
-    None,
-    Tuple[Text, Text],
-    auth.AuthBase,
-    Callable[[PreparedRequest], PreparedRequest],
+    None, Tuple[Text, Text], auth.AuthBase, Callable[[PreparedRequest], PreparedRequest]
 ]
 Timeout = Union[None, float, Tuple[float, float]]
 AllowRedirects = Optional[bool]

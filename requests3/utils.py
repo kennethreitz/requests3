@@ -40,7 +40,7 @@ from ._basics import (
     basestring,
     integer_types,
     proxy_bypass_environment,
-    getproxies_environment
+    getproxies_environment,
 )
 from .http_cookies import cookiejar_from_dict, RequestsCookieJar
 from ._structures import HTTPHeaderDict

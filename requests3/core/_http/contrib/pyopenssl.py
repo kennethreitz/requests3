@@ -63,7 +63,7 @@ import sys
 
 from .. import util
 
-__all__ = ['inject_into_urllib3', 'extract_from_urllib3']
+__all__ = ["inject_into_urllib3", "extract_from_urllib3"]
 # SNI always works.
 HAS_SNI = True
 # Map from urllib3 to PyOpenSSL compatible parameter-values.
@@ -71,9 +71,9 @@ _openssl_versions = {
     ssl.PROTOCOL_SSLv23: OpenSSL.SSL.SSLv23_METHOD,
     ssl.PROTOCOL_TLSv1: OpenSSL.SSL.TLSv1_METHOD,
 }
-if hasattr(ssl, 'PROTOCOL_TLSv1_1') and hasattr(OpenSSL.SSL, 'TLSv1_1_METHOD'):
+if hasattr(ssl, "PROTOCOL_TLSv1_1") and hasattr(OpenSSL.SSL, "TLSv1_1_METHOD"):
     _openssl_versions[ssl.PROTOCOL_TLSv1_1] = OpenSSL.SSL.TLSv1_1_METHOD
-if hasattr(ssl, 'PROTOCOL_TLSv1_2') and hasattr(OpenSSL.SSL, 'TLSv1_2_METHOD'):
+if hasattr(ssl, "PROTOCOL_TLSv1_2") and hasattr(OpenSSL.SSL, "TLSv1_2_METHOD"):
     _openssl_versions[ssl.PROTOCOL_TLSv1_2] = OpenSSL.SSL.TLSv1_2_METHOD
 try:
     _openssl_versions.update({ssl.PROTOCOL_SSLv3: OpenSSL.SSL.SSLv3_METHOD})
@@ -82,12 +82,10 @@ except AttributeError:
 _stdlib_to_openssl_verify = {
     ssl.CERT_NONE: OpenSSL.SSL.VERIFY_NONE,
     ssl.CERT_OPTIONAL: OpenSSL.SSL.VERIFY_PEER,
-    ssl.CERT_REQUIRED: OpenSSL.SSL.VERIFY_PEER +
-    OpenSSL.SSL.VERIFY_FAIL_IF_NO_PEER_CERT,
+    ssl.CERT_REQUIRED: OpenSSL.SSL.VERIFY_PEER
+    + OpenSSL.SSL.VERIFY_FAIL_IF_NO_PEER_CERT,
 }
-_openssl_to_stdlib_verify = dict(
-    (v, k) for k, v in _stdlib_to_openssl_verify.items()
-)
+_openssl_to_stdlib_verify = dict((v, k) for k, v in _stdlib_to_openssl_verify.items())
 # OpenSSL will only write 16K at a time
 SSL_WRITE_BLOCKSIZE = 16384
 orig_util_HAS_SNI = util.HAS_SNI
@@ -96,7 +94,7 @@ log = logging.getLogger(__name__)
 
 
 def inject_into_urllib3():
-    'Monkey-patch urllib3 with PyOpenSSL-backed SSL-support.'
+    "Monkey-patch urllib3 with PyOpenSSL-backed SSL-support."
     _validate_dependencies_met()
     util.ssl_.SSLContext = PyOpenSSLContext
     util.HAS_SNI = HAS_SNI
@@ -106,7 +104,7 @@ def inject_into_urllib3():
 
 
 def extract_from_urllib3():
-    'Undo monkey-patching by :func:`inject_into_urllib3`.'
+    "Undo monkey-patching by :func:`inject_into_urllib3`."
     util.ssl_.SSLContext = orig_util_SSLContext
     util.HAS_SNI = orig_util_HAS_SNI
     util.ssl_.HAS_SNI = orig_util_HAS_SNI
@@ -159,16 +157,16 @@ def _dnsname_to_stdlib(name):
         """
         import idna
 
-        for prefix in [u'*.', u'.']:
+        for prefix in [u"*.", u"."]:
             if name.startswith(prefix):
-                name = name[len(prefix):]
-                return prefix.encode('ascii') + idna.encode(name)
+                name = name[len(prefix) :]
+                return prefix.encode("ascii") + idna.encode(name)
 
         return idna.encode(name)
 
     name = idna_encode(name)
     if sys.version_info >= (3, 0):
-        name = name.decode('utf-8')
+        name = name.decode("utf-8")
     return name
 
 
@@ -186,9 +184,7 @@ def get_subj_alt_name(peer_cert):
     # We want to find the SAN extension. Ask Cryptography to locate it (it's
     # faster than looping in Python)
     try:
-        ext = cert.extensions.get_extension_for_class(
-            x509.SubjectAlternativeName
-        ).value
+        ext = cert.extensions.get_extension_for_class(x509.SubjectAlternativeName).value
     except x509.ExtensionNotFound:
         # No such extension, return the empty list.
         return []
@@ -216,22 +212,21 @@ def get_subj_alt_name(peer_cert):
     # decoded. This is pretty frustrating, but that's what the standard library
     # does with certificates, and so we need to attempt to do the same.
     names = [
-        ('DNS', _dnsname_to_stdlib(name))
+        ("DNS", _dnsname_to_stdlib(name))
         for name in ext.get_values_for_type(x509.DNSName)
     ]
     names.extend(
-        ('IP Address', str(name))
-        for name in ext.get_values_for_type(x509.IPAddress)
+        ("IP Address", str(name)) for name in ext.get_values_for_type(x509.IPAddress)
     )
     return names
 
 
 class WrappedSocket(object):
-    '''API-compatibility wrapper for Python OpenSSL's Connection-class.
+    """API-compatibility wrapper for Python OpenSSL's Connection-class.
 
     Note: _makefile_refs, _drop() and _reuse() are needed for the garbage
     collector of pypy.
-    '''
+    """
 
     def __init__(self, connection, socket, suppress_ragged_eofs=True):
         self.connection = connection
@@ -242,7 +237,6 @@ class WrappedSocket(object):
 
     def fileno(self):
         return self.socket.fileno()
-
 
     # Copy-pasted from Python 3.5 source code
     def _decref_socketios(self):
@@ -255,15 +249,15 @@ class WrappedSocket(object):
         try:
             data = self.connection.recv(*args, **kwargs)
         except OpenSSL.SSL.SysCallError as e:
-            if self.suppress_ragged_eofs and e.args == (-1, 'Unexpected EOF'):
-                return b''
+            if self.suppress_ragged_eofs and e.args == (-1, "Unexpected EOF"):
+                return b""
 
             else:
                 raise SocketError(str(e))
 
         except OpenSSL.SSL.ZeroReturnError as e:
             if self.connection.get_shutdown() == OpenSSL.SSL.RECEIVED_SHUTDOWN:
-                return b''
+                return b""
 
             else:
                 raise
@@ -271,7 +265,7 @@ class WrappedSocket(object):
         except OpenSSL.SSL.WantReadError:
             rd = util.wait_for_read(self.socket, self.socket.gettimeout())
             if not rd:
-                raise timeout('The read operation timed out')
+                raise timeout("The read operation timed out")
 
             else:
                 return self.recv(*args, **kwargs)
@@ -284,7 +278,7 @@ class WrappedSocket(object):
             return self.connection.recv_into(*args, **kwargs)
 
         except OpenSSL.SSL.SysCallError as e:
-            if self.suppress_ragged_eofs and e.args == (-1, 'Unexpected EOF'):
+            if self.suppress_ragged_eofs and e.args == (-1, "Unexpected EOF"):
                 return 0
 
             else:
@@ -300,7 +294,7 @@ class WrappedSocket(object):
         except OpenSSL.SSL.WantReadError:
             rd = util.wait_for_read(self.socket, self.socket.gettimeout())
             if not rd:
-                raise timeout('The read operation timed out')
+                raise timeout("The read operation timed out")
 
             else:
                 return self.recv_into(*args, **kwargs)
@@ -330,7 +324,7 @@ class WrappedSocket(object):
         total_sent = 0
         while total_sent < len(data):
             sent = self._send_until_done(
-                data[total_sent:total_sent + SSL_WRITE_BLOCKSIZE]
+                data[total_sent : total_sent + SSL_WRITE_BLOCKSIZE]
             )
             total_sent += sent
 
@@ -356,13 +350,11 @@ class WrappedSocket(object):
             return x509
 
         if binary_form:
-            return OpenSSL.crypto.dump_certificate(
-                OpenSSL.crypto.FILETYPE_ASN1, x509
-            )
+            return OpenSSL.crypto.dump_certificate(OpenSSL.crypto.FILETYPE_ASN1, x509)
 
         return {
-            'subject': ((('commonName', x509.get_subject().CN),),),
-            'subjectAltName': get_subj_alt_name(x509),
+            "subject": ((("commonName", x509.get_subject().CN),),),
+            "subjectAltName": get_subj_alt_name(x509),
         }
 
     def setblocking(self, flag):
@@ -418,23 +410,21 @@ class PyOpenSSLContext(object):
 
     @verify_mode.setter
     def verify_mode(self, value):
-        self._ctx.set_verify(
-            _stdlib_to_openssl_verify[value], _verify_callback
-        )
+        self._ctx.set_verify(_stdlib_to_openssl_verify[value], _verify_callback)
 
     def set_default_verify_paths(self):
         self._ctx.set_default_verify_paths()
 
     def set_ciphers(self, ciphers):
         if isinstance(ciphers, six.text_type):
-            ciphers = ciphers.encode('utf-8')
+            ciphers = ciphers.encode("utf-8")
         self._ctx.set_cipher_list(ciphers)
 
     def load_verify_locations(self, cafile=None, capath=None, cadata=None):
         if cafile is not None:
-            cafile = cafile.encode('utf-8')
+            cafile = cafile.encode("utf-8")
         if capath is not None:
-            capath = capath.encode('utf-8')
+            capath = capath.encode("utf-8")
         self._ctx.load_verify_locations(cafile, capath)
         if cadata is not None:
             self._ctx.load_verify_locations(BytesIO(cadata))
@@ -442,9 +432,7 @@ class PyOpenSSLContext(object):
     def load_cert_chain(self, certfile, keyfile=None, password=None):
         self._ctx.use_certificate_chain_file(certfile)
         if password is not None:
-            self._ctx.set_passwd_cb(
-                lambda max_length, prompt_twice, userdata: password
-            )
+            self._ctx.set_passwd_cb(lambda max_length, prompt_twice, userdata: password)
         self._ctx.use_privatekey_file(keyfile or certfile)
 
     def wrap_socket(
@@ -456,10 +444,8 @@ class PyOpenSSLContext(object):
         server_hostname=None,
     ):
         cnx = OpenSSL.SSL.Connection(self._ctx, sock)
-        if isinstance(
-            server_hostname, six.text_type
-        ):  # Platform-specific: Python 3
-            server_hostname = server_hostname.encode('utf-8')
+        if isinstance(server_hostname, six.text_type):  # Platform-specific: Python 3
+            server_hostname = server_hostname.encode("utf-8")
         if server_hostname is not None:
             cnx.set_tlsext_host_name(server_hostname)
         cnx.set_connect_state()
@@ -469,12 +455,12 @@ class PyOpenSSLContext(object):
             except OpenSSL.SSL.WantReadError:
                 rd = util.wait_for_read(sock, sock.gettimeout())
                 if not rd:
-                    raise timeout('select timed out')
+                    raise timeout("select timed out")
 
                 continue
 
             except OpenSSL.SSL.Error as e:
-                raise ssl.SSLError('bad handshake: %r' % e)
+                raise ssl.SSLError("bad handshake: %r" % e)
 
             break
 

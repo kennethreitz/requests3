@@ -85,18 +85,22 @@ class Timeout(object):
         time, consider having a second "watcher" thread to cut off a slow
         request.
     """
+
     # : A sentinel object representing the default timeout value
     DEFAULT_TIMEOUT = _GLOBAL_DEFAULT_TIMEOUT
 
     def __init__(self, total=None, connect=_Default, read=_Default):
-        self._connect = self._validate_timeout(connect, 'connect')
-        self._read = self._validate_timeout(read, 'read')
-        self.total = self._validate_timeout(total, 'total')
+        self._connect = self._validate_timeout(connect, "connect")
+        self._read = self._validate_timeout(read, "read")
+        self.total = self._validate_timeout(total, "total")
         self._start_connect = None
 
     def __str__(self):
-        return '%s(connect=%r, read=%r, total=%r)' % (
-            type(self).__name__, self._connect, self._read, self.total
+        return "%s(connect=%r, read=%r, total=%r)" % (
+            type(self).__name__,
+            self._connect,
+            self._read,
+            self.total,
         )
 
     @classmethod
@@ -174,9 +178,7 @@ class Timeout(object):
         # We can't use copy.deepcopy because that will also create a new object
         # for _GLOBAL_DEFAULT_TIMEOUT, which socket.py uses as a sentinel to
         # detect the user default.
-        return Timeout(
-            connect=self._connect, read=self._read, total=self.total
-        )
+        return Timeout(connect=self._connect, read=self._read, total=self.total)
 
     def start_connect(self):
         """ Start the timeout clock, used during a connect() attempt
@@ -241,18 +243,16 @@ class Timeout(object):
             has not yet been called on this object.
         """
         if (
-            self.total is not None and
-            self.total is not self.DEFAULT_TIMEOUT and
-            self._read is not None and
-            self._read is not self.DEFAULT_TIMEOUT
+            self.total is not None
+            and self.total is not self.DEFAULT_TIMEOUT
+            and self._read is not None
+            and self._read is not self.DEFAULT_TIMEOUT
         ):
             # In case the connect timeout has not yet been established.
             if self._start_connect is None:
                 return self._read
 
-            return max(
-                0, min(self.total - self.get_connect_duration(), self._read)
-            )
+            return max(0, min(self.total - self.get_connect_duration(), self._read))
 
         elif self.total is not None and self.total is not self.DEFAULT_TIMEOUT:
             return max(0, self.total - self.get_connect_duration())

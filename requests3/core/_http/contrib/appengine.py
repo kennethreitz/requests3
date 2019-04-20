@@ -144,9 +144,7 @@ class AppEngineManager(RequestMethods):
     ):
         retries = self._get_retries(retries, redirect)
         try:
-            follow_redirects = (
-                redirect and retries.redirect != 0 and retries.total
-            )
+            follow_redirects = redirect and retries.redirect != 0 and retries.total
             response = urlfetch.fetch(
                 url,
                 payload=body,
@@ -161,7 +159,7 @@ class AppEngineManager(RequestMethods):
             raise TimeoutError(self, e)
 
         except urlfetch.InvalidURLError as e:
-            if 'too large' in str(e):
+            if "too large" in str(e):
                 raise AppEnginePlatformError(
                     "URLFetch request too large, URLFetch only "
                     "supports requests up to 10mb in size.",
@@ -171,7 +169,7 @@ class AppEngineManager(RequestMethods):
             raise ProtocolError(e)
 
         except urlfetch.DownloadError as e:
-            if 'Too many redirects' in str(e):
+            if "Too many redirects" in str(e):
                 raise MaxRetryError(self, url, reason=e)
 
             raise ProtocolError(e)
@@ -198,12 +196,12 @@ class AppEngineManager(RequestMethods):
         redirect_location = redirect and http_response.get_redirect_location()
         if redirect_location:
             # Check for redirect response
-            if (self.urlfetch_retries and retries.raise_on_redirect):
+            if self.urlfetch_retries and retries.raise_on_redirect:
                 raise MaxRetryError(self, url, "too many redirects")
 
             else:
                 if http_response.status == 303:
-                    method = 'GET'
+                    method = "GET"
                 try:
                     retries = retries.increment(
                         method, url, response=http_response, _pool=self
@@ -229,11 +227,9 @@ class AppEngineManager(RequestMethods):
                 )
 
         # Check if we should retry the HTTP response.
-        has_retry_after = bool(http_response.getheader('Retry-After'))
+        has_retry_after = bool(http_response.getheader("Retry-After"))
         if retries.is_retry(method, http_response.status, has_retry_after):
-            retries = retries.increment(
-                method, url, response=http_response, _pool=self
-            )
+            retries = retries.increment(method, url, response=http_response, _pool=self)
             log.debug("Retry: %s", url)
             retries.sleep(http_response)
             return self.urlopen(
@@ -249,22 +245,20 @@ class AppEngineManager(RequestMethods):
 
         return http_response
 
-    def _urlfetch_response_to_http_response(
-        self, urlfetch_resp, **response_kw
-    ):
+    def _urlfetch_response_to_http_response(self, urlfetch_resp, **response_kw):
         if is_prod_appengine():
             # Production GAE handles deflate encoding automatically, but does
             # not remove the encoding header.
-            content_encoding = urlfetch_resp.headers.get('content-encoding')
-            if content_encoding == 'deflate':
-                del urlfetch_resp.headers['content-encoding']
-        transfer_encoding = urlfetch_resp.headers.get('transfer-encoding')
+            content_encoding = urlfetch_resp.headers.get("content-encoding")
+            if content_encoding == "deflate":
+                del urlfetch_resp.headers["content-encoding"]
+        transfer_encoding = urlfetch_resp.headers.get("transfer-encoding")
         # We have a full response's content,
         # so let's make sure we don't report ourselves as chunked data.
-        if transfer_encoding == 'chunked':
+        if transfer_encoding == "chunked":
             encodings = transfer_encoding.split(",")
-            encodings.remove('chunked')
-            urlfetch_resp.headers['transfer-encoding'] = ','.join(encodings)
+            encodings.remove("chunked")
+            urlfetch_resp.headers["transfer-encoding"] = ",".join(encodings)
         return HTTPResponse(
             # In order for decoding to work, we must present the content as
             # a file-like object.
@@ -291,9 +285,7 @@ class AppEngineManager(RequestMethods):
 
     def _get_retries(self, retries, redirect):
         if not isinstance(retries, Retry):
-            retries = Retry.from_int(
-                retries, redirect=redirect, default=self.retries
-            )
+            retries = Retry.from_int(retries, redirect=redirect, default=self.retries)
         if retries.connect or retries.read or retries.redirect:
             warnings.warn(
                 "URLFetch only supports total retries and does not "
@@ -304,9 +296,7 @@ class AppEngineManager(RequestMethods):
 
 
 def is_appengine():
-    return (
-        is_local_appengine() or is_prod_appengine() or is_prod_appengine_mvms()
-    )
+    return is_local_appengine() or is_prod_appengine() or is_prod_appengine_mvms()
 
 
 def is_appengine_sandbox():
@@ -315,18 +305,18 @@ def is_appengine_sandbox():
 
 def is_local_appengine():
     return (
-        'APPENGINE_RUNTIME' in os.environ and
-        'Development/' in os.environ['SERVER_SOFTWARE']
+        "APPENGINE_RUNTIME" in os.environ
+        and "Development/" in os.environ["SERVER_SOFTWARE"]
     )
 
 
 def is_prod_appengine():
     return (
-        'APPENGINE_RUNTIME' in os.environ and
-        'Google App Engine/' in os.environ['SERVER_SOFTWARE'] and
-        not is_prod_appengine_mvms()
+        "APPENGINE_RUNTIME" in os.environ
+        and "Google App Engine/" in os.environ["SERVER_SOFTWARE"]
+        and not is_prod_appengine_mvms()
     )
 
 
 def is_prod_appengine_mvms():
-    return os.environ.get('GAE_VM', False) == 'true'
+    return os.environ.get("GAE_VM", False) == "true"

@@ -6,10 +6,7 @@ BUFSIZE = 65536
 
 
 class TrioBackend:
-
-    async def connect(
-        self, host, port, source_address=None, socket_options=None
-    ):
+    async def connect(self, host, port, source_address=None, socket_options=None):
         if source_address is not None:
             # You can't really combine source_address= and happy eyeballs
             # (can we get rid of source_address? or at least make it a source
@@ -30,14 +27,11 @@ class TrioBackend:
         return len(self) > other
 
 
-
-
 # XX it turns out that we don't need SSLStream to be robustified against
 # cancellation, but we probably should do something to detect when the stream
 # has been broken by cancellation (e.g. a timeout) and make is_readable return
 # True so the connection won't be reused.
 class TrioSocket:
-
     def __init__(self, stream):
         self._stream = stream
 
@@ -57,7 +51,6 @@ class TrioSocket:
         return await self._stream.receive_some(BUFSIZE)
 
     async def send_and_receive_for_a_while(self, produce_bytes, consume_bytes):
-
         async def sender():
             while True:
                 outgoing = await produce_bytes()
@@ -78,7 +71,6 @@ class TrioSocket:
         except LoopAbort:
             pass
 
-
     # Pull out the underlying trio socket, because it turns out HTTP is not so
     # great at respecting abstraction boundaries.
     def _socket(self):
@@ -88,7 +80,6 @@ class TrioSocket:
             stream = stream.transport_stream
         # Now we have a SocketStream
         return stream.socket
-
 
     # We want this to be synchronous, and don't care about graceful teardown
     # of the SSL/TLS layer.

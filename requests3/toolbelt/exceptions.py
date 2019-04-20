@@ -4,6 +4,7 @@
 
 class StreamingError(Exception):
     """Used in :mod:`requests_toolbelt.downloadutils.stream`."""
+
     pass
 
 
@@ -13,6 +14,7 @@ class VersionMismatchError(Exception):
     The feature in use requires a newer version of Requests to function
     appropriately but the version installed is not sufficient.
     """
+
     pass
 
 
@@ -22,6 +24,7 @@ class RequestsVersionTooOld(Warning):
     If the version of Requests is too old to support a feature, we will issue
     this warning to the user.
     """
+
     pass
 
 
@@ -34,4 +37,5 @@ class IgnoringGAECertificateValidation(Warning):
 
     In :class:`requests_toolbelt.adapters.appengine.InsecureAppEngineAdapter`.
     """
+
     pass

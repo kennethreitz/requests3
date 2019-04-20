@@ -12,4 +12,4 @@ See https://toolbelt.readthedocs.io/ for documentation
 from .ssl import SSLAdapter
 from .source import SourceAddressAdapter
 
-__all__ = ['SSLAdapter', 'SourceAddressAdapter']
+__all__ = ["SSLAdapter", "SourceAddressAdapter"]

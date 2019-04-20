@@ -16,7 +16,7 @@ from requests.structures import CaseInsensitiveDict
 
 def _split_on_find(content, bound):
     point = content.find(bound)
-    return content[:point], content[point + len(bound):]
+    return content[:point], content[point + len(bound) :]
 
 
 class ImproperBodyPartContentException(Exception):
@@ -32,10 +32,7 @@ def _header_parser(string, encoding):
     if major == 3:
         string = string.decode(encoding)
     headers = email.parser.HeaderParser().parsestr(string).items()
-    return (
-        (encode_with(k, encoding), encode_with(v, encoding))
-        for k, v in headers
-    )
+    return ((encode_with(k, encoding), encode_with(v, encoding)) for k, v in headers)
 
 
 class BodyPart(object):
@@ -55,13 +52,13 @@ class BodyPart(object):
         self.encoding = encoding
         headers = {}
         # Split into header section (if any) and the content
-        if b'\r\n\r\n' in content:
-            first, self.content = _split_on_find(content, b'\r\n\r\n')
-            if first != b'':
+        if b"\r\n\r\n" in content:
+            first, self.content = _split_on_find(content, b"\r\n\r\n")
+            if first != b"":
                 headers = _header_parser(first.lstrip(), encoding)
         else:
             raise ImproperBodyPartContentException(
-                'content does not contain CR-LF-CR-LF'
+                "content does not contain CR-LF-CR-LF"
             )
         self.headers = CaseInsensitiveDict(headers)
 
@@ -100,7 +97,8 @@ class MultipartDecoder(object):
     ``'utf-8'``).
 
     """
-    def __init__(self, content, content_type, encoding='utf-8'):
+
+    def __init__(self, content, content_type, encoding="utf-8"):
         #: Original Content-Type header
         self.content_type = content_type
         #: Response body encoding
@@ -111,18 +109,15 @@ class MultipartDecoder(object):
         self._parse_body(content)
 
     def _find_boundary(self):
-        ct_info = tuple(x.strip() for x in self.content_type.split(';'))
+        ct_info = tuple(x.strip() for x in self.content_type.split(";"))
         mimetype = ct_info[0]
-        if mimetype.split('/')[0].lower() != 'multipart':
+        if mimetype.split("/")[0].lower() != "multipart":
             raise NonMultipartContentTypeException(
                 "Unexpected mimetype in content-type: '{}'".format(mimetype)
             )
         for item in ct_info[1:]:
-            attr, value = _split_on_find(
-                item,
-                '='
-            )
-            if attr.lower() == 'boundary':
+            attr, value = _split_on_find(item, "=")
+            if attr.lower() == "boundary":
                 self.boundary = encode_with(value.strip('"'), self.encoding)
 
     @staticmethod
@@ -134,23 +129,25 @@ class MultipartDecoder(object):
             return part
 
     def _parse_body(self, content):
-        boundary = b''.join((b'--', self.boundary))
+        boundary = b"".join((b"--", self.boundary))
 
         def body_part(part):
             fixed = MultipartDecoder._fix_first_part(part, boundary)
             return BodyPart(fixed, self.encoding)
 
         def test_part(part):
-            return (part != b'' and
-                    part != b'\r\n' and
-                    part[:4] != b'--\r\n' and
-                    part != b'--')
+            return (
+                part != b""
+                and part != b"\r\n"
+                and part[:4] != b"--\r\n"
+                and part != b"--"
+            )
 
-        parts = content.split(b''.join((b'\r\n', boundary)))
+        parts = content.split(b"".join((b"\r\n", boundary)))
         self.parts = tuple(body_part(x) for x in parts if test_part(x))
 
     @classmethod
-    def from_response(cls, response, encoding='utf-8'):
+    def from_response(cls, response, encoding="utf-8"):
         content = response.content
-        content_type = response.headers.get('content-type', None)
+        content_type = response.headers.get("content-type", None)
         return cls(content, content_type, encoding)

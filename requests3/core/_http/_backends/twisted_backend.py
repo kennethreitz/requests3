@@ -4,7 +4,10 @@ from twisted.internet import protocol, ssl
 from twisted.internet.interfaces import IHandshakeListener
 from twisted.internet.endpoints import HostnameEndpoint, connectProtocol
 from twisted.internet.defer import (
-    Deferred, DeferredList, CancelledError, ensureDeferred
+    Deferred,
+    DeferredList,
+    CancelledError,
+    ensureDeferred,
 )
 from zope.interface import implementer
 
@@ -12,16 +15,12 @@ from ..contrib.pyopenssl import get_subj_alt_name
 from ._common import LoopAbort
 
 
-
 # XX need to add timeout support, esp. on connect
 class TwistedBackend:
-
     def __init__(self, reactor):
         self._reactor = reactor
 
-    async def connect(
-        self, host, port, source_address=None, socket_options=None
-    ):
+    async def connect(self, host, port, source_address=None, socket_options=None):
         # HostnameEndpoint only supports setting source host, not source port
         if source_address is not None:
             raise NotImplementedError(
@@ -45,8 +44,6 @@ class TwistedBackend:
         return TwistedSocket(protocol)
 
 
-
-
 # enums
 class _DATA_RECEIVED:
     pass
@@ -62,7 +59,6 @@ class _HANDSHAKE_COMPLETED:
 
 @implementer(IHandshakeListener)
 class TwistedSocketProtocol(protocol.Protocol):
-
     def connectionMade(self):
         self._receive_buffer = bytearray()
         self.transport.pauseProducing()
@@ -161,7 +157,6 @@ class TwistedSocketProtocol(protocol.Protocol):
 
 
 class DoubleError(Exception):
-
     def __init__(self, exc1, exc2):
         self.exc1 = exc1
         self.exc2 = exc2
@@ -171,7 +166,6 @@ class DoubleError(Exception):
 
 
 class TwistedSocket:
-
     def __init__(self, protocol):
         self._protocol = protocol
 
@@ -185,9 +179,7 @@ class TwistedSocket:
             return x509
 
         if binary:
-            return OpenSSL.crypto.dump_certificate(
-                OpenSSL.crypto.FILETYPE_ASN1, x509
-            )
+            return OpenSSL.crypto.dump_certificate(OpenSSL.crypto.FILETYPE_ASN1, x509)
 
         return {
             "subject": ((("commonName", x509.get_subject().CN),),),
@@ -198,7 +190,6 @@ class TwistedSocket:
         return await self._protocol.receive_some()
 
     async def send_and_receive_for_a_while(self, produce_bytes, consume_bytes):
-
         async def sender():
             while True:
                 outgoing = await produce_bytes()
@@ -225,7 +216,6 @@ class TwistedSocket:
         def send_loop_errback(failure):
             receive_loop.cancel()
             return failure
-
 
         # If the receive_loop errors out *or* exits cleanly due to LoopAbort,
         # then cancel the send_loop and preserve the result

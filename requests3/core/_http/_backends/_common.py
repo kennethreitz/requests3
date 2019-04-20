@@ -26,4 +26,5 @@ class LoopAbort(Exception):
     """
     Tell backends that enough bytes have been consumed
     """
+
     pass

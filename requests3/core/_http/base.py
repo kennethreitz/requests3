@@ -60,7 +60,7 @@ class Request(object):
         do not duplicate the host header: if there already is one, we just use
         that one.
         """
-        if b'host' not in self.headers:
+        if b"host" not in self.headers:
             # We test against a sentinel object here to forcibly always insert
             # the port for schemes we don't understand.
             if port is DEFAULT_PORTS.get(scheme, object()):

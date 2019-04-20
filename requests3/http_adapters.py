@@ -92,26 +92,26 @@ def _pool_kwargs(verify, cert):
                 "invalid path: {0}".format(cert_loc)
             )
 
-        pool_kwargs['cert_reqs'] = 'CERT_REQUIRED'
+        pool_kwargs["cert_reqs"] = "CERT_REQUIRED"
         if not os.path.isdir(cert_loc):
-            pool_kwargs['ca_certs'] = cert_loc
-            pool_kwargs['ca_cert_dir'] = None
+            pool_kwargs["ca_certs"] = cert_loc
+            pool_kwargs["ca_cert_dir"] = None
         else:
-            pool_kwargs['ca_cert_dir'] = cert_loc
-            pool_kwargs['ca_certs'] = None
+            pool_kwargs["ca_cert_dir"] = cert_loc
+            pool_kwargs["ca_certs"] = None
     else:
-        pool_kwargs['cert_reqs'] = 'CERT_NONE'
-        pool_kwargs['ca_certs'] = None
-        pool_kwargs['ca_cert_dir'] = None
+        pool_kwargs["cert_reqs"] = "CERT_NONE"
+        pool_kwargs["ca_certs"] = None
+        pool_kwargs["ca_cert_dir"] = None
     if cert:
         if not isinstance(cert, basestring):
-            pool_kwargs['cert_file'] = cert[0]
-            pool_kwargs['key_file'] = cert[1]
+            pool_kwargs["cert_file"] = cert[0]
+            pool_kwargs["key_file"] = cert[1]
         else:
-            pool_kwargs['cert_file'] = cert
-            pool_kwargs['key_file'] = None
-        cert_file = pool_kwargs['cert_file']
-        key_file = pool_kwargs['key_file']
+            pool_kwargs["cert_file"] = cert
+            pool_kwargs["key_file"] = None
+        cert_file = pool_kwargs["cert_file"]
+        key_file = pool_kwargs["key_file"]
         if cert_file and not os.path.exists(cert_file):
             raise IOError(
                 "Could not find the TLS certificate file, "
@@ -120,8 +120,7 @@ def _pool_kwargs(verify, cert):
 
         if key_file and not os.path.exists(key_file):
             raise IOError(
-                "Could not find the TLS key file, "
-                "invalid path: {0}".format(key_file)
+                "Could not find the TLS key file, " "invalid path: {0}".format(key_file)
             )
 
     return pool_kwargs
@@ -134,13 +133,7 @@ class BaseAdapter(object):
         super(BaseAdapter, self).__init__()
 
     def send(
-        self,
-        request,
-        stream=False,
-        timeout=None,
-        verify=True,
-        cert=None,
-        proxies=None,
+        self, request, stream=False, timeout=None, verify=True, cert=None, proxies=None
     ):
         """Sends PreparedRequest object. Returns Response object.
 
@@ -189,12 +182,13 @@ class HTTPAdapter(BaseAdapter):
       >>> a = requests.adapters.HTTPAdapter(max_retries=3)
       >>> s.mount('http://', a)
     """
+
     __attrs__ = [
-        'max_retries',
-        'config',
-        '_pool_connections',
-        '_pool_maxsize',
-        '_pool_block',
+        "max_retries",
+        "config",
+        "_pool_connections",
+        "_pool_maxsize",
+        "_pool_block",
     ]
 
     def __init__(
@@ -270,7 +264,7 @@ class HTTPAdapter(BaseAdapter):
         """
         if proxy in self.proxy_manager:
             manager = self.proxy_manager[proxy]
-        elif proxy.lower().startswith('socks'):
+        elif proxy.lower().startswith("socks"):
             username, password = get_auth_from_url(proxy)
             manager = self.proxy_manager[proxy] = SOCKSProxyManager(
                 proxy,
@@ -305,15 +299,15 @@ class HTTPAdapter(BaseAdapter):
         """
         response = Response()
         # Fallback to None if there's no status_code, for whatever reason.
-        response.status_code = getattr(resp, 'status', None)
+        response.status_code = getattr(resp, "status", None)
         # Make headers case-insensitive.
-        response.headers = HTTPHeaderDict(getattr(resp, 'headers', {}))
+        response.headers = HTTPHeaderDict(getattr(resp, "headers", {}))
         # Set encoding.
         response.encoding = get_encoding_from_headers(response.headers)
         response.raw = resp
         response.reason = response.raw.reason
         if isinstance(req.url, bytes):
-            response.url = req.url.decode('utf-8')
+            response.url = req.url.decode("utf-8")
         else:
             response.url = req.url
         # Add new cookies from the server.
@@ -335,18 +329,14 @@ class HTTPAdapter(BaseAdapter):
         pool_kwargs = _pool_kwargs(verify, cert)
         proxy = select_proxy(url, proxies)
         if proxy:
-            proxy = prepend_scheme_if_needed(proxy, 'http')
+            proxy = prepend_scheme_if_needed(proxy, "http")
             proxy_manager = self.proxy_manager_for(proxy)
-            conn = proxy_manager.connection_from_url(
-                url, pool_kwargs=pool_kwargs
-            )
+            conn = proxy_manager.connection_from_url(url, pool_kwargs=pool_kwargs)
         else:
             # Only scheme should be lower case
             parsed = urlparse(url)
             url = parsed.geturl()
-            conn = self.poolmanager.connection_from_url(
-                url, pool_kwargs=pool_kwargs
-            )
+            conn = self.poolmanager.connection_from_url(url, pool_kwargs=pool_kwargs)
         return conn
 
     def close(self):
@@ -375,11 +365,11 @@ class HTTPAdapter(BaseAdapter):
         """
         proxy = select_proxy(request.url, proxies)
         scheme = urlparse(request.url).scheme
-        is_proxied_http_request = (proxy and scheme != 'https')
+        is_proxied_http_request = proxy and scheme != "https"
         using_socks_proxy = False
         if proxy:
             proxy_scheme = urlparse(proxy).scheme.lower()
-            using_socks_proxy = proxy_scheme.startswith('socks')
+            using_socks_proxy = proxy_scheme.startswith("socks")
         url = request.path_url
         if is_proxied_http_request and not using_socks_proxy:
             url = urldefragauth(request.url)
@@ -415,19 +405,11 @@ class HTTPAdapter(BaseAdapter):
         headers = {}
         username, password = get_auth_from_url(proxy)
         if username:
-            headers['Proxy-Authorization'] = _basic_auth_str(
-                username, password
-            )
+            headers["Proxy-Authorization"] = _basic_auth_str(username, password)
         return headers
 
     def send(
-        self,
-        request,
-        stream=False,
-        timeout=None,
-        verify=True,
-        cert=None,
-        proxies=None,
+        self, request, stream=False, timeout=None, verify=True, cert=None, proxies=None
     ):
         """Sends PreparedRequest object. Returns Response object.
 
@@ -447,9 +429,7 @@ class HTTPAdapter(BaseAdapter):
         conn = self.get_connection(request.url, proxies, verify, cert)
         url = self.request_url(request, proxies)
         self.add_headers(request)
-        chunked = not (
-            request.body is None or 'Content-Length' in request.headers
-        )
+        chunked = not (request.body is None or "Content-Length" in request.headers)
         if isinstance(timeout, tuple):
             try:
                 connect, read = timeout
@@ -481,17 +461,15 @@ class HTTPAdapter(BaseAdapter):
                     retries=self.max_retries,
                     timeout=timeout,
                     enforce_content_length=True,
-                    pool=conn
+                    pool=conn,
                 )
             # Send the request.
             else:
-                if hasattr(conn, 'proxy_pool'):
+                if hasattr(conn, "proxy_pool"):
                     conn = conn.proxy_pool
                 low_conn = conn._get_conn(timeout=DEFAULT_POOL_TIMEOUT)
                 try:
-                    low_conn.putrequest(
-                        request.method, url, skip_accept_encoding=True
-                    )
+                    low_conn.putrequest(request.method, url, skip_accept_encoding=True)
                     for header, value in request.headers.items():
                         low_conn.putheader(header, value)
                     low_conn.endheaders()
@@ -500,11 +478,11 @@ class HTTPAdapter(BaseAdapter):
                         if chunk_size == 0:
                             continue
 
-                        low_conn.send(hex(chunk_size)[2:].encode('utf-8'))
-                        low_conn.send(b'\r\n')
+                        low_conn.send(hex(chunk_size)[2:].encode("utf-8"))
+                        low_conn.send(b"\r\n")
                         low_conn.send(i)
-                        low_conn.send(b'\r\n')
-                    low_conn.send(b'0\r\n\r\n')
+                        low_conn.send(b"\r\n")
+                    low_conn.send(b"0\r\n\r\n")
                     # Receive the response from the server
                     try:
                         # For Python 2.7, use buffering of HTTP responses
@@ -570,6 +548,7 @@ class HTTPAdapter(BaseAdapter):
 
 class AsyncHTTPAdapter(HTTPAdapter):
     """docstring for AsyncHTTPAdapter"""
+
     def __init__(self, backend=None, *args, **kwargs):
         self.backend = backend or TrioBackend()
         super(AsyncHTTPAdapter, self).__init__(*args, **kwargs)
@@ -586,15 +565,15 @@ class AsyncHTTPAdapter(HTTPAdapter):
         """
         response = AsyncResponse()
         # Fallback to None if there's no status_code, for whatever reason.
-        response.status_code = getattr(resp, 'status', None)
+        response.status_code = getattr(resp, "status", None)
         # Make headers case-insensitive.
-        response.headers = HTTPHeaderDict(getattr(resp, 'headers', {}))
+        response.headers = HTTPHeaderDict(getattr(resp, "headers", {}))
         # Set encoding.
         response.encoding = get_encoding_from_headers(response.headers)
         response.raw = resp
         response.reason = response.raw.reason
         if isinstance(req.url, bytes):
-            response.url = req.url.decode('utf-8')
+            response.url = req.url.decode("utf-8")
         else:
             response.url = req.url
         # Add new cookies from the server.
@@ -643,18 +622,14 @@ class AsyncHTTPAdapter(HTTPAdapter):
         pool_kwargs = _pool_kwargs(verify, cert)
         proxy = select_proxy(url, proxies)
         if proxy:
-            proxy = prepend_scheme_if_needed(proxy, 'http')
+            proxy = prepend_scheme_if_needed(proxy, "http")
             proxy_manager = self.proxy_manager_for(proxy)
-            conn = proxy_manager.connection_from_url(
-                url, pool_kwargs=pool_kwargs
-            )
+            conn = proxy_manager.connection_from_url(url, pool_kwargs=pool_kwargs)
         else:
             # Only scheme should be lower case
             parsed = urlparse(url)
             url = parsed.geturl()
-            conn = self.poolmanager.connection_from_url(
-                url, pool_kwargs=pool_kwargs
-            )
+            conn = self.poolmanager.connection_from_url(url, pool_kwargs=pool_kwargs)
         return conn
 
     def close(self):
@@ -669,13 +644,7 @@ class AsyncHTTPAdapter(HTTPAdapter):
         pass
 
     async def send(
-        self,
-        request,
-        stream=False,
-        timeout=None,
-        verify=True,
-        cert=None,
-        proxies=None,
+        self, request, stream=False, timeout=None, verify=True, cert=None, proxies=None
     ):
         """Sends PreparedRequest object. Returns Response object.
 
@@ -696,9 +665,7 @@ class AsyncHTTPAdapter(HTTPAdapter):
 
         url = self.request_url(request, proxies)
         self.add_headers(request)
-        chunked = not (
-            request.body is None or 'Content-Length' in request.headers
-        )
+        chunked = not (request.body is None or "Content-Length" in request.headers)
         if isinstance(timeout, tuple):
             try:
                 connect, read = timeout
@@ -730,18 +697,16 @@ class AsyncHTTPAdapter(HTTPAdapter):
                     retries=self.max_retries,
                     timeout=timeout,
                     enforce_content_length=True,
-                    pool=conn
+                    pool=conn,
                 )
 
             # Send the request.
             else:
-                if hasattr(conn, 'proxy_pool'):
+                if hasattr(conn, "proxy_pool"):
                     conn = conn.proxy_pool
                 low_conn = conn._get_conn(timeout=DEFAULT_POOL_TIMEOUT)
                 try:
-                    low_conn.putrequest(
-                        request.method, url, skip_accept_encoding=True
-                    )
+                    low_conn.putrequest(request.method, url, skip_accept_encoding=True)
                     for header, value in request.headers.items():
                         low_conn.putheader(header, value)
                     low_conn.endheaders()
@@ -750,11 +715,11 @@ class AsyncHTTPAdapter(HTTPAdapter):
                         if chunk_size == 0:
                             continue
 
-                        low_conn.send(hex(chunk_size)[2:].encode('utf-8'))
-                        low_conn.send(b'\r\n')
+                        low_conn.send(hex(chunk_size)[2:].encode("utf-8"))
+                        low_conn.send(b"\r\n")
                         low_conn.send(i)
-                        low_conn.send(b'\r\n')
-                    low_conn.send(b'0\r\n\r\n')
+                        low_conn.send(b"\r\n")
+                    low_conn.send(b"0\r\n\r\n")
                     # Receive the response from the server
                     try:
                         # For Python 2.7, use buffering of HTTP responses

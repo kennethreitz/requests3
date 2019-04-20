@@ -60,7 +60,7 @@ class AuthHandler(AuthBase):
         return auth(request)
 
     def __repr__(self):
-        return '<AuthHandler({!r})>'.format(self.strategies)
+        return "<AuthHandler({!r})>".format(self.strategies)
 
     def _make_uniform(self):
         existing_strategies = list(self.strategies.items())
@@ -72,9 +72,9 @@ class AuthHandler(AuthBase):
     @staticmethod
     def _key_from_url(url):
         parsed = urlparse(url)
-        return urlunparse((parsed.scheme.lower(),
-                           parsed.netloc.lower(),
-                           '', '', '', ''))
+        return urlunparse(
+            (parsed.scheme.lower(), parsed.netloc.lower(), "", "", "", "")
+        )
 
     def add_strategy(self, domain, strategy):
         """Add a new domain and authentication strategy.
@@ -136,7 +136,7 @@ class AuthHandler(AuthBase):
 
 class NullAuthStrategy(AuthBase):
     def __repr__(self):
-        return '<NullAuthStrategy>'
+        return "<NullAuthStrategy>"
 
     def __call__(self, r):
         return r

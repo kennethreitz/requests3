@@ -1,4 +1,4 @@
-from .selectors import (HAS_SELECT, DefaultSelector, EVENT_READ, EVENT_WRITE)
+from .selectors import HAS_SELECT, DefaultSelector, EVENT_READ, EVENT_WRITE
 
 
 def _wait_for_io_events(socks, events, timeout=None):
@@ -6,7 +6,7 @@ def _wait_for_io_events(socks, events, timeout=None):
     or optionally a single socket if passed in. Returns a list of
     sockets that can be interacted with immediately. """
     if not HAS_SELECT:
-        raise ValueError('Platform does not have a selector')
+        raise ValueError("Platform does not have a selector")
 
     if not isinstance(socks, list):
         # Probably just a single socket.
@@ -18,11 +18,7 @@ def _wait_for_io_events(socks, events, timeout=None):
     with DefaultSelector() as selector:
         for sock in socks:
             selector.register(sock, events)
-        return [
-            key[0].fileobj
-            for key in selector.select(timeout)
-            if key[1] & events
-        ]
+        return [key[0].fileobj for key in selector.select(timeout) if key[1] & events]
 
 
 def wait_for_read(socks, timeout=None):

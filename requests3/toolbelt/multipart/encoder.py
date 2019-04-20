@@ -84,21 +84,23 @@ class MultipartEncoder(object):
 
     """
 
-    def __init__(self, fields, boundary=None, encoding='utf-8'):
+    def __init__(self, fields, boundary=None, encoding="utf-8"):
         #: Boundary value either passed in by the user or created
         self.boundary_value = boundary or uuid4().hex
 
         # Computed boundary
-        self.boundary = '--{}'.format(self.boundary_value)
+        self.boundary = "--{}".format(self.boundary_value)
 
         #: Encoding of the data being passed in
         self.encoding = encoding
 
         # Pre-encoded boundary
-        self._encoded_boundary = b''.join([
-            encode_with(self.boundary, self.encoding),
-            encode_with('\r\n', self.encoding)
-            ])
+        self._encoded_boundary = b"".join(
+            [
+                encode_with(self.boundary, self.encoding),
+                encode_with("\r\n", self.encoding),
+            ]
+        )
 
         #: Fields provided by the user
         self.fields = fields
@@ -148,7 +150,7 @@ class MultipartEncoder(object):
         return self._len or self._calculate_length()
 
     def __repr__(self):
-        return '<MultipartEncoder: {!r}>'.format(self.fields)
+        return "<MultipartEncoder: {!r}>".format(self.fields)
 
     def _calculate_length(self):
         """
@@ -158,9 +160,11 @@ class MultipartEncoder(object):
         """
         boundary_len = len(self.boundary)  # Length of --{boundary}
         # boundary length + header length + body length + len('\r\n') * 2
-        self._len = sum(
-            (boundary_len + total_len(p) + 4) for p in self.parts
-            ) + boundary_len + 4
+        self._len = (
+            sum((boundary_len + total_len(p) + 4) for p in self.parts)
+            + boundary_len
+            + 4
+        )
         return self._len
 
     def _calculate_load_amount(self, read_size):
@@ -191,7 +195,7 @@ class MultipartEncoder(object):
         while amount == -1 or amount > 0:
             written = 0
             if part and not part.bytes_left_to_write():
-                written += self._write(b'\r\n')
+                written += self._write(b"\r\n")
                 written += self._write_boundary()
                 part = self._next_part()
 
@@ -214,7 +218,7 @@ class MultipartEncoder(object):
 
     def _iter_fields(self):
         _fields = self.fields
-        if hasattr(self.fields, 'items'):
+        if hasattr(self.fields, "items"):
             _fields = list(self.fields.items())
         for k, v in _fields:
             file_name = None
@@ -230,9 +234,9 @@ class MultipartEncoder(object):
             else:
                 file_pointer = v
 
-            field = fields.RequestField(name=k, data=file_pointer,
-                                        filename=file_name,
-                                        headers=file_headers)
+            field = fields.RequestField(
+                name=k, data=file_pointer, filename=file_name, headers=file_headers
+            )
             field.make_multipart(content_type=file_type)
             yield field
 
@@ -263,7 +267,7 @@ class MultipartEncoder(object):
         """Write the bytes necessary to finish a multipart/form-data body."""
         with reset(self._buffer):
             self._buffer.seek(-2, 2)
-            self._buffer.write(b'--\r\n')
+            self._buffer.write(b"--\r\n")
         return 2
 
     def _write_headers(self, headers):
@@ -272,9 +276,7 @@ class MultipartEncoder(object):
 
     @property
     def content_type(self):
-        return str(
-            'multipart/form-data; boundary={}'.format(self.boundary_value)
-            )
+        return str("multipart/form-data; boundary={}".format(self.boundary_value))
 
     def to_string(self):
         """Return the entirety of the data in the encoder.
@@ -385,8 +387,7 @@ class MultipartEncoderMonitor(object):
         self.len = self.encoder.len
 
     @classmethod
-    def from_fields(cls, fields, boundary=None, encoding='utf-8',
-                    callback=None):
+    def from_fields(cls, fields, boundary=None, encoding="utf-8", callback=None):
         encoder = MultipartEncoder(fields, boundary, encoding)
         return cls(encoder, callback)
 
@@ -419,20 +420,20 @@ def encode_with(string, encoding):
 
 def readable_data(data, encoding):
     """Coerce the data to an object with a ``read`` method."""
-    if hasattr(data, 'read'):
+    if hasattr(data, "read"):
         return data
 
     return CustomBytesIO(data, encoding)
 
 
 def total_len(o):
-    if hasattr(o, '__len__'):
+    if hasattr(o, "__len__"):
         return len(o)
 
-    if hasattr(o, 'len'):
+    if hasattr(o, "len"):
         return o.len
 
-    if hasattr(o, 'fileno'):
+    if hasattr(o, "fileno"):
         try:
             fileno = o.fileno()
         except io.UnsupportedOperation:
@@ -440,7 +441,7 @@ def total_len(o):
         else:
             return os.fstat(fileno).st_size
 
-    if hasattr(o, 'getvalue'):
+    if hasattr(o, "getvalue"):
         # e.g. BytesIO, cStringIO.StringIO
         return len(o.getvalue())
 
@@ -462,20 +463,20 @@ def reset(buffer):
 def coerce_data(data, encoding):
     """Ensure that every object's __len__ behaves uniformly."""
     if not isinstance(data, CustomBytesIO):
-        if hasattr(data, 'getvalue'):
+        if hasattr(data, "getvalue"):
             return CustomBytesIO(data.getvalue(), encoding)
 
-        if hasattr(data, 'fileno'):
+        if hasattr(data, "fileno"):
             return FileWrapper(data)
 
-        if not hasattr(data, 'read'):
+        if not hasattr(data, "read"):
             return CustomBytesIO(data, encoding)
 
     return data
 
 
 def to_list(fields):
-    if hasattr(fields, 'items'):
+    if hasattr(fields, "items"):
         return list(fields.items())
     return list(fields)
 
@@ -531,7 +532,7 @@ class Part(object):
 
 
 class CustomBytesIO(io.BytesIO):
-    def __init__(self, buffer=None, encoding='utf-8'):
+    def __init__(self, buffer=None, encoding="utf-8"):
         buffer = encode_with(buffer, encoding)
         super(CustomBytesIO, self).__init__(buffer)
 
@@ -625,18 +626,17 @@ class FileFromURLWrapper(object):
     def __init__(self, file_url, session=None):
         self.session = session or requests.Session()
         requested_file = self._request_for_file(file_url)
-        self.len = int(requested_file.headers['content-length'])
+        self.len = int(requested_file.headers["content-length"])
         self.raw_data = requested_file.raw
 
     def _request_for_file(self, file_url):
         """Make call for file under provided URL."""
         response = self.session.get(file_url, stream=True)
-        content_length = response.headers.get('content-length', None)
+        content_length = response.headers.get("content-length", None)
         if content_length is None:
             error_msg = (
                 "Data from provided URL {url} is not supported. Lack of "
-                "content-length Header in requested file response.".format(
-                    url=file_url)
+                "content-length Header in requested file response.".format(url=file_url)
             )
             raise FileNotSupportedError(error_msg)
         elif not content_length.isdigit():
@@ -650,6 +650,6 @@ class FileFromURLWrapper(object):
     def read(self, chunk_size):
         """Read file in chunks."""
         chunk_size = chunk_size if chunk_size >= 0 else self.len
-        chunk = self.raw_data.read(chunk_size) or b''
+        chunk = self.raw_data.read(chunk_size) or b""
         self.len -= len(chunk) if chunk else 0  # left to read
         return chunk

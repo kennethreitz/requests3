@@ -3,9 +3,10 @@ import trio
 from ._http import AsyncPoolManager, PoolManager
 from ._http._backends import TrioBackend
 
-from .import _http
+from . import _http
 
 __all__ = ["request", "blocking_request"]
+
 
 async def request(
     method,
@@ -22,13 +23,13 @@ async def request(
     if not pool:
         pool = AsyncPoolManager(backend=TrioBackend())
     return await pool.urlopen(
-            method=method,
-            url=url,
-            headers=headers,
-            preload_content=preload_content,
-            body=body,
-            **kwargs
-        )
+        method=method,
+        url=url,
+        headers=headers,
+        preload_content=preload_content,
+        body=body,
+        **kwargs
+    )
 
 
 def blocking_request(

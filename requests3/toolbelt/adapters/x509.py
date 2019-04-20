@@ -9,8 +9,10 @@ X.509 certificate without needing to convert it to a .pem file
 
 from OpenSSL.crypto import PKey, X509
 from cryptography import x509
-from cryptography.hazmat.primitives.serialization import (load_pem_private_key,
-                                                          load_der_private_key)
+from cryptography.hazmat.primitives.serialization import (
+    load_pem_private_key,
+    load_der_private_key,
+)
 from cryptography.hazmat.primitives.serialization import Encoding
 from cryptography.hazmat.backends import default_backend
 
@@ -82,49 +84,52 @@ class X509Adapter(HTTPAdapter):
 
     def __init__(self, *args, **kwargs):
         self._check_version()
-        cert_bytes = kwargs.pop('cert_bytes', None)
-        pk_bytes = kwargs.pop('pk_bytes', None)
-        password = kwargs.pop('password', None)
-        encoding = kwargs.pop('encoding', Encoding.PEM)
+        cert_bytes = kwargs.pop("cert_bytes", None)
+        pk_bytes = kwargs.pop("pk_bytes", None)
+        password = kwargs.pop("password", None)
+        encoding = kwargs.pop("encoding", Encoding.PEM)
 
         password_bytes = None
 
         if cert_bytes is None or not isinstance(cert_bytes, bytes):
-            raise ValueError('Invalid cert content provided. '
-                             'You must provide an X.509 cert '
-                             'formatted as a byte array.')
+            raise ValueError(
+                "Invalid cert content provided. "
+                "You must provide an X.509 cert "
+                "formatted as a byte array."
+            )
         if pk_bytes is None or not isinstance(pk_bytes, bytes):
-            raise ValueError('Invalid private key content provided. '
-                             'You must provide a private key '
-                             'formatted as a byte array.')
+            raise ValueError(
+                "Invalid private key content provided. "
+                "You must provide a private key "
+                "formatted as a byte array."
+            )
 
         if isinstance(password, bytes):
             password_bytes = password
         elif password:
-            password_bytes = password.encode('utf8')
+            password_bytes = password.encode("utf8")
 
-        self.ssl_context = create_ssl_context(cert_bytes, pk_bytes,
-                                              password_bytes, encoding)
+        self.ssl_context = create_ssl_context(
+            cert_bytes, pk_bytes, password_bytes, encoding
+        )
 
         super(X509Adapter, self).__init__(*args, **kwargs)
 
     def init_poolmanager(self, *args, **kwargs):
         if self.ssl_context:
-            kwargs['ssl_context'] = self.ssl_context
+            kwargs["ssl_context"] = self.ssl_context
         return super(X509Adapter, self).init_poolmanager(*args, **kwargs)
 
     def proxy_manager_for(self, *args, **kwargs):
         if self.ssl_context:
-            kwargs['ssl_context'] = self.ssl_context
+            kwargs["ssl_context"] = self.ssl_context
         return super(X509Adapter, self).proxy_manager_for(*args, **kwargs)
 
     def _check_version(self):
         if PyOpenSSLContext is None:
             raise exc.VersionMismatchError(
                 "The X509Adapter requires at least Requests 2.12.0 to be "
-                "installed. Version {} was found instead.".format(
-                    requests.__version__
-                )
+                "installed. Version {} was found instead.".format(requests.__version__)
             )
 
 
@@ -133,14 +138,16 @@ def check_cert_dates(cert):
 
     now = datetime.utcnow()
     if cert.not_valid_after < now or cert.not_valid_before > now:
-        raise ValueError('Client certificate expired: Not After: '
-                         '{:%Y-%m-%d %H:%M:%SZ} '
-                         'Not Before: {:%Y-%m-%d %H:%M:%SZ}'
-                         .format(cert.not_valid_after, cert.not_valid_before))
+        raise ValueError(
+            "Client certificate expired: Not After: "
+            "{:%Y-%m-%d %H:%M:%SZ} "
+            "Not Before: {:%Y-%m-%d %H:%M:%SZ}".format(
+                cert.not_valid_after, cert.not_valid_before
+            )
+        )
 
 
-def create_ssl_context(cert_byes, pk_bytes, password=None,
-                       encoding=Encoding.PEM):
+def create_ssl_context(cert_byes, pk_bytes, password=None, encoding=Encoding.PEM):
     """Create an SSL Context with the supplied cert/password.
 
     :param cert_bytes array of bytes containing the cert encoded
@@ -166,11 +173,10 @@ def create_ssl_context(cert_byes, pk_bytes, password=None,
         cert = x509.load_der_x509_certificate(cert_byes, backend)
         key = load_der_private_key(pk_bytes, password, backend)
     else:
-        raise ValueError('Invalid encoding provided: Must be PEM or DER')
+        raise ValueError("Invalid encoding provided: Must be PEM or DER")
 
     if not (cert and key):
-        raise ValueError('Cert and key could not be parsed from '
-                         'provided data')
+        raise ValueError("Cert and key could not be parsed from " "provided data")
     check_cert_dates(cert)
     ssl_context = PyOpenSSLContext(PROTOCOL)
     ssl_context._ctx.use_certificate(X509.from_cryptography(cert))

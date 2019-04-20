@@ -42,6 +42,7 @@ class SourceAddressAdapter(HTTPAdapter):
         s.mount('http://', SourceAddressAdapter('10.10.10.10'))
         s.mount('https://', SourceAddressAdapter(('10.10.10.10', 8999)))
     """
+
     def __init__(self, source_address, **kwargs):
         if isinstance(source_address, basestring):
             self.source_address = (source_address, 0)
@@ -59,9 +60,9 @@ class SourceAddressAdapter(HTTPAdapter):
             num_pools=connections,
             maxsize=maxsize,
             block=block,
-            source_address=self.source_address)
+            source_address=self.source_address,
+        )
 
     def proxy_manager_for(self, *args, **kwargs):
-        kwargs['source_address'] = self.source_address
-        return super(SourceAddressAdapter, self).proxy_manager_for(
-            *args, **kwargs)
+        kwargs["source_address"] = self.source_address
+        return super(SourceAddressAdapter, self).proxy_manager_for(*args, **kwargs)

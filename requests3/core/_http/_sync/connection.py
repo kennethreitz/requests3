@@ -45,7 +45,7 @@ except ImportError:
 # within two years of the current date, and no
 # earlier than 6 months ago.
 RECENT_DATE = datetime.date(2016, 1, 1)
-_SUPPORTED_VERSIONS = frozenset([b'1.0', b'1.1'])
+_SUPPORTED_VERSIONS = frozenset([b"1.0", b"1.1"])
 # A sentinel object returned when some syscalls return EAGAIN.
 _EAGAIN = object()
 
@@ -61,9 +61,9 @@ def _headers_to_native_string(headers):
     # 3 and need to decode the headers using Latin1.
     for n, v in headers:
         if not isinstance(n, str):
-            n = n.decode('latin1')
+            n = n.decode("latin1")
         if not isinstance(v, str):
-            v = v.decode('latin1')
+            v = v.decode("latin1")
         yield (n, v)
 
 
@@ -74,11 +74,11 @@ def _stringify_headers(headers):
     # TODO: revisit
     for name, value in headers:
         if isinstance(name, six.text_type):
-            name = name.encode('ascii')
+            name = name.encode("ascii")
         if isinstance(value, six.text_type):
-            value = value.encode('latin-1')
+            value = value.encode("latin-1")
         elif isinstance(value, int):
-            value = str(value).encode('ascii')
+            value = str(value).encode("ascii")
         yield (name, value)
 
 
@@ -91,8 +91,6 @@ def _read_readable(readable):
             break
 
         yield datablock
-
-
 
 
 # XX this should return an async iterator
@@ -122,15 +120,11 @@ def _make_body_iterable(body):
     elif hasattr(body, "read"):
         return _read_readable(body)
 
-    elif isinstance(body, collections.Iterable) and not isinstance(
-        body, six.text_type
-    ):
+    elif isinstance(body, collections.Iterable) and not isinstance(body, six.text_type):
         return body
 
     else:
         raise InvalidBodyError("Unacceptable body type: %s" % type(body))
-
-
 
 
 # XX this should return an async iterator
@@ -158,7 +152,7 @@ def _response_from_h11(h11_response, body_object):
     if h11_response.http_version not in _SUPPORTED_VERSIONS:
         raise BadVersionError(h11_response.http_version)
 
-    version = b'HTTP/' + h11_response.http_version
+    version = b"HTTP/" + h11_response.http_version
     our_response = Response(
         status_code=h11_response.status_code,
         headers=_headers_to_native_string(h11_response.headers),
@@ -175,9 +169,9 @@ def _build_tunnel_request(host, port, headers):
     """
     target = "%s:%d" % (host, port)
     if not isinstance(target, bytes):
-        target = target.encode('latin1')
+        target = target.encode("latin1")
     tunnel_request = Request(method=b"CONNECT", target=target, headers=headers)
-    tunnel_request.add_host(host=host, port=port, scheme='http')
+    tunnel_request.add_host(host=host, port=port, scheme="http")
     return tunnel_request
 
 
@@ -195,14 +189,14 @@ def _start_http_request(request, state_machine, conn):
     """
     # Before we begin, confirm that the state machine is ok.
     if (
-        state_machine.our_state is not h11.IDLE or
-        state_machine.their_state is not h11.IDLE
+        state_machine.our_state is not h11.IDLE
+        or state_machine.their_state is not h11.IDLE
     ):
         raise ProtocolError("Invalid internal state transition")
 
     request_bytes_iterable = _request_bytes_iterable(request, state_machine)
     # Hack around Python 2 lack of nonlocal
-    context = {'send_aborted': True, 'h11_response': None}
+    context = {"send_aborted": True, "h11_response": None}
 
     def next_bytes_to_send():
         try:
@@ -210,7 +204,7 @@ def _start_http_request(request, state_machine, conn):
 
         except StopIteration:
             # We successfully sent the whole body!
-            context['send_aborted'] = False
+            context["send_aborted"] = False
             return None
 
     def consume_bytes(data):
@@ -226,7 +220,7 @@ def _start_http_request(request, state_machine, conn):
 
             elif isinstance(event, h11.Response):
                 # We have our response! Save it and get out of here.
-                context['h11_response'] = event
+                context["h11_response"] = event
                 raise LoopAbort
 
             else:
@@ -234,8 +228,8 @@ def _start_http_request(request, state_machine, conn):
                 raise RuntimeError("Unexpected h11 event {}".format(event))
 
     conn.send_and_receive_for_a_while(next_bytes_to_send, consume_bytes)
-    assert context['h11_response'] is not None
-    if context['send_aborted']:
+    assert context["h11_response"] is not None
+    if context["send_aborted"]:
         # Our state machine thinks we sent a bunch of data... but maybe we
         # didn't! Maybe our send got cancelled while we were only half-way
         # through sending the last chunk, and then h11 thinks we sent a
@@ -246,7 +240,7 @@ def _start_http_request(request, state_machine, conn):
         # state_machine.poison()
         # XX kluge for now
         state_machine._cstate.process_error(state_machine.our_role)
-    return context['h11_response']
+    return context["h11_response"]
 
 
 def _read_until_event(state_machine, conn):
@@ -281,6 +275,7 @@ class HTTP1Connection(object):
     data is buffered it will issue one read syscall and return all of that
     data. Buffering of response data must happen at a higher layer.
     """
+
     # : Disable Nagle's algorithm by default.
     #: ``[(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)]``
     default_socket_options = [(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)]
@@ -301,7 +296,9 @@ class HTTP1Connection(object):
         self._host = host
         self._port = port
         self._socket_options = (
-            socket_options if socket_options is not _DEFAULT_SOCKET_OPTIONS else self.default_socket_options
+            socket_options
+            if socket_options is not _DEFAULT_SOCKET_OPTIONS
+            else self.default_socket_options
         )
         self._source_address = source_address
         self._tunnel_host = tunnel_host
@@ -310,9 +307,7 @@ class HTTP1Connection(object):
         self._sock = None
         self._state_machine = h11.Connection(our_role=h11.CLIENT)
 
-    def _wrap_socket(
-        self, conn, ssl_context, fingerprint, assert_hostname
-    ):
+    def _wrap_socket(self, conn, ssl_context, fingerprint, assert_hostname):
         """
         Handles extra logic to wrap the socket in TLS magic.
         """
@@ -320,11 +315,9 @@ class HTTP1Connection(object):
         if is_time_off:
             warnings.warn(
                 (
-                    'System time is way off (before {0}). This will probably '
-                    'lead to SSL verification errors'
-                ).format(
-                    RECENT_DATE
-                ),
+                    "System time is way off (before {0}). This will probably "
+                    "lead to SSL verification errors"
+                ).format(RECENT_DATE),
                 SystemTimeWarning,
             )
         # XX need to know whether this is the proxy or the final host that
@@ -337,30 +330,24 @@ class HTTP1Connection(object):
         check_host = check_host.rstrip(".")
         conn = conn.start_tls(check_host, ssl_context)
         if fingerprint:
-            ssl_util.assert_fingerprint(
-                conn.getpeercert(binary_form=True), fingerprint
-            )
-        elif (
-            ssl_context.verify_mode != ssl.CERT_NONE and
-            assert_hostname is not False
-        ):
+            ssl_util.assert_fingerprint(conn.getpeercert(binary_form=True), fingerprint)
+        elif ssl_context.verify_mode != ssl.CERT_NONE and assert_hostname is not False:
             cert = conn.getpeercert()
-            if not cert.get('subjectAltName', ()):
+            if not cert.get("subjectAltName", ()):
                 warnings.warn(
                     (
-                        'Certificate for {0} has no `subjectAltName`, falling '
-                        'back to check for a `commonName` for now. This '
-                        'feature is being removed by major browsers and '
-                        'deprecated by RFC 2818. (See '
-                        'https://github.com/shazow/urllib3/issues/497 for '
-                        'details.)'.format(self._host)
+                        "Certificate for {0} has no `subjectAltName`, falling "
+                        "back to check for a `commonName` for now. This "
+                        "feature is being removed by major browsers and "
+                        "deprecated by RFC 2818. (See "
+                        "https://github.com/shazow/urllib3/issues/497 for "
+                        "details.)".format(self._host)
                     ),
                     SubjectAltNameWarning,
                 )
             ssl_util.match_hostname(cert, check_host)
-        self.is_verified = (
-            ssl_context.verify_mode == ssl.CERT_REQUIRED and
-            (assert_hostname is not False or fingerprint)
+        self.is_verified = ssl_context.verify_mode == ssl.CERT_REQUIRED and (
+            assert_hostname is not False or fingerprint
         )
         return conn
 
@@ -368,9 +355,7 @@ class HTTP1Connection(object):
         """
         Given a Request object, performs the logic required to get a response.
         """
-        h11_response = _start_http_request(
-            request, self._state_machine, self._sock
-        )
+        h11_response = _start_http_request(request, self._state_machine, self._sock)
         return _response_from_h11(h11_response, self)
 
     def _tunnel(self, conn):
@@ -383,9 +368,7 @@ class HTTP1Connection(object):
             self._tunnel_host, self._tunnel_port, self._tunnel_headers
         )
         tunnel_state_machine = h11.Connection(our_role=h11.CLIENT)
-        h11_response = _start_http_request(
-            tunnel_request, tunnel_state_machine, conn
-        )
+        h11_response = _start_http_request(tunnel_request, tunnel_state_machine, conn)
         # XX this is wrong -- 'self' here will try to iterate using
         # self._state_machine, not tunnel_state_machine. Also, we need to
         # think about how this failure case interacts with the pool's
@@ -415,24 +398,22 @@ class HTTP1Connection(object):
 
         extra_kw = {}
         if self._source_address:
-            extra_kw['source_address'] = self._source_address
+            extra_kw["source_address"] = self._source_address
         if self._socket_options:
-            extra_kw['socket_options'] = self._socket_options
+            extra_kw["socket_options"] = self._socket_options
         # XX pass connect_timeout to backend
         # This was factored out into a separate function to allow overriding
         # by subclasses, but in the backend approach the way to to this is to
         # provide a custom backend. (Composition >> inheritance.)
         try:
-            conn = self._backend.connect(
-                self._host, self._port, **extra_kw
-            )
+            conn = self._backend.connect(self._host, self._port, **extra_kw)
         # XX these two error handling blocks needs to be re-done in a
         # backend-agnostic way
         except socket.timeout:
             raise ConnectTimeoutError(
                 self,
-                "Connection to %s timed out. (connect timeout=%s)" %
-                (self._host, connect_timeout),
+                "Connection to %s timed out. (connect timeout=%s)"
+                % (self._host, connect_timeout),
             )
 
         except socket.error as e:
@@ -443,9 +424,7 @@ class HTTP1Connection(object):
         if ssl_context is not None:
             if self._tunnel_host is not None:
                 self._tunnel(conn)
-            conn = self._wrap_socket(
-                conn, ssl_context, fingerprint, assert_hostname
-            )
+            conn = self._wrap_socket(conn, ssl_context, fingerprint, assert_hostname)
         # XX We should pick one of these names and use it consistently...
         self._sock = conn
 
@@ -501,7 +480,7 @@ class HTTP1Connection(object):
         """
         our_state = self._state_machine.our_state
         their_state = self._state_machine.their_state
-        return (our_state is h11.IDLE and their_state is h11.IDLE)
+        return our_state is h11.IDLE and their_state is h11.IDLE
 
     def __iter__(self):
         return self

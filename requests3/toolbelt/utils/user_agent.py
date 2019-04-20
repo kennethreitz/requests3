@@ -20,12 +20,13 @@ def user_agent(name, version, extras=None):
     if extras is None:
         extras = []
 
-    return UserAgentBuilder(
-            name, version
-        ).include_extras(
-            extras
-        ).include_implementation(
-        ).include_system().build()
+    return (
+        UserAgentBuilder(name, version)
+        .include_extras(extras)
+        .include_implementation()
+        .include_system()
+        .build()
+    )
 
 
 class UserAgentBuilder(object):
@@ -47,7 +48,7 @@ class UserAgentBuilder(object):
 
     """
 
-    format_string = '%s/%s'
+    format_string = "%s/%s"
 
     def __init__(self, name, version):
         """Initialize our builder with the name and version of our user agent.
@@ -76,7 +77,7 @@ class UserAgentBuilder(object):
             list of tuples of extra-name and extra-version
         """
         if any(len(extra) != 2 for extra in extras):
-            raise ValueError('Extras should be a sequence of two item tuples.')
+            raise ValueError("Extras should be a sequence of two item tuples.")
 
         self._pieces.extend(extras)
         return self
@@ -109,22 +110,24 @@ def _implementation_tuple():
     """
     implementation = platform.python_implementation()
 
-    if implementation == 'CPython':
+    if implementation == "CPython":
         implementation_version = platform.python_version()
-    elif implementation == 'PyPy':
-        implementation_version = '%s.%s.%s' % (sys.pypy_version_info.major,
-                                               sys.pypy_version_info.minor,
-                                               sys.pypy_version_info.micro)
-        if sys.pypy_version_info.releaselevel != 'final':
-            implementation_version = ''.join([
-                implementation_version, sys.pypy_version_info.releaselevel
-                ])
-    elif implementation == 'Jython':
+    elif implementation == "PyPy":
+        implementation_version = "%s.%s.%s" % (
+            sys.pypy_version_info.major,
+            sys.pypy_version_info.minor,
+            sys.pypy_version_info.micro,
+        )
+        if sys.pypy_version_info.releaselevel != "final":
+            implementation_version = "".join(
+                [implementation_version, sys.pypy_version_info.releaselevel]
+            )
+    elif implementation == "Jython":
         implementation_version = platform.python_version()  # Complete Guess
-    elif implementation == 'IronPython':
+    elif implementation == "IronPython":
         implementation_version = platform.python_version()  # Complete Guess
     else:
-        implementation_version = 'Unknown'
+        implementation_version = "Unknown"
 
     return (implementation, implementation_version)
 
@@ -138,6 +141,6 @@ def _platform_tuple():
         p_system = platform.system()
         p_release = platform.release()
     except IOError:
-        p_system = 'Unknown'
-        p_release = 'Unknown'
+        p_system = "Unknown"
+        p_release = "Unknown"
     return (p_system, p_release)

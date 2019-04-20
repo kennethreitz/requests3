@@ -52,6 +52,7 @@ class AppEngineMROHack(adapters.HTTPAdapter):
     monkeypatch, at which point this class becomes HTTPAdapter's base class.
     In addition, we use an instantiation flag to avoid infinite recursion.
     """
+
     _initialized = False
 
     def __init__(self, *args, **kwargs):
@@ -71,7 +72,7 @@ class AppEngineAdapter(AppEngineMROHack, adapters.HTTPAdapter):
     for Requests to be able to use it.
     """
 
-    __attrs__ = adapters.HTTPAdapter.__attrs__ + ['_validate_certificate']
+    __attrs__ = adapters.HTTPAdapter.__attrs__ + ["_validate_certificate"]
 
     def __init__(self, validate_certificate=True, *args, **kwargs):
         _check_version()
@@ -99,13 +100,17 @@ class InsecureAppEngineAdapter(AppEngineAdapter):
 
     def __init__(self, *args, **kwargs):
         if kwargs.pop("validate_certificate", False):
-            warnings.warn("Certificate validation cannot be specified on the "
-                          "InsecureAppEngineAdapter, but was present. This "
-                          "will be ignored and certificate validation will "
-                          "remain off.", exc.IgnoringGAECertificateValidation)
+            warnings.warn(
+                "Certificate validation cannot be specified on the "
+                "InsecureAppEngineAdapter, but was present. This "
+                "will be ignored and certificate validation will "
+                "remain off.",
+                exc.IgnoringGAECertificateValidation,
+            )
 
         super(InsecureAppEngineAdapter, self).__init__(
-            validate_certificate=False, *args, **kwargs)
+            validate_certificate=False, *args, **kwargs
+        )
 
 
 class _AppEnginePoolManager(object):
@@ -119,7 +124,8 @@ class _AppEnginePoolManager(object):
 
     def __init__(self, validate_certificate=True):
         self.appengine_manager = gaecontrib.AppEngineManager(
-            validate_certificate=validate_certificate)
+            validate_certificate=validate_certificate
+        )
 
     def connection_from_url(self, url):
         return _AppEngineConnection(self.appengine_manager, url)
@@ -143,10 +149,20 @@ class _AppEngineConnection(object):
         self.appengine_manager = appengine_manager
         self.url = url
 
-    def urlopen(self, method, url, body=None, headers=None, retries=None,
-                redirect=True, assert_same_host=True,
-                timeout=timeout.Timeout.DEFAULT_TIMEOUT,
-                pool_timeout=None, release_conn=None, **response_kw):
+    def urlopen(
+        self,
+        method,
+        url,
+        body=None,
+        headers=None,
+        retries=None,
+        redirect=True,
+        assert_same_host=True,
+        timeout=timeout.Timeout.DEFAULT_TIMEOUT,
+        pool_timeout=None,
+        release_conn=None,
+        **response_kw
+    ):
         # This function's url argument is a host-relative URL,
         # but the AppEngineManager expects an absolute URL.
         # So we saved out the self.url when the AppEngineConnection
@@ -169,7 +185,8 @@ class _AppEngineConnection(object):
             retries=retries,
             redirect=redirect,
             timeout=timeout,
-            **response_kw)
+            **response_kw
+        )
 
 
 def monkeypatch(validate_certificate=True):
@@ -200,7 +217,5 @@ def _check_version():
     if gaecontrib is None:
         raise exc.VersionMismatchError(
             "The toolbelt requires at least Requests 2.10.0 to be "
-            "installed. Version {} was found instead.".format(
-                requests.__version__
-            )
+            "installed. Version {} was found instead.".format(requests.__version__)
         )

@@ -33,7 +33,7 @@ class FingerprintAdapter(HTTPAdapter):
     containing colons.
     """
 
-    __attrs__ = HTTPAdapter.__attrs__ + ['fingerprint']
+    __attrs__ = HTTPAdapter.__attrs__ + ["fingerprint"]
 
     def __init__(self, fingerprint, **kwargs):
         self.fingerprint = fingerprint
@@ -45,4 +45,5 @@ class FingerprintAdapter(HTTPAdapter):
             num_pools=connections,
             maxsize=maxsize,
             block=block,
-            assert_fingerprint=self.fingerprint)
+            assert_fingerprint=self.fingerprint,
+        )

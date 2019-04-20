@@ -8,8 +8,7 @@ from .._compat import queue
 
 
 class SessionThread(object):
-    def __init__(self, initialized_session, job_queue, response_queue,
-                 exception_queue):
+    def __init__(self, initialized_session, job_queue, response_queue, exception_queue):
         self._session = initialized_session
         self._jobs = job_queue
         self._create_worker()
@@ -17,10 +16,7 @@ class SessionThread(object):
         self._exceptions = exception_queue
 
     def _create_worker(self):
-        self._worker = threading.Thread(
-            target=self._make_request,
-            name=uuid.uuid4(),
-        )
+        self._worker = threading.Thread(target=self._make_request, name=uuid.uuid4())
         self._worker.daemon = True
         self._worker._state = 0
         self._worker.start()

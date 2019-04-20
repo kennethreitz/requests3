@@ -52,14 +52,12 @@ class StreamingIterator(object):
     appropriately because the toolbelt will not attempt to guess that for you.
     """
 
-    def __init__(self, size, iterator, encoding='utf-8'):
+    def __init__(self, size, iterator, encoding="utf-8"):
         #: The expected size of the upload
         self.size = int(size)
 
         if self.size < 0:
-            raise ValueError(
-                'The size of the upload must be a positive integer'
-                )
+            raise ValueError("The size of the upload must be a positive integer")
 
         #: Attribute that requests will check to determine the length of the
         #: body. See bug #80 for more details
@@ -71,7 +69,7 @@ class StreamingIterator(object):
         #: The iterator used to generate the upload data
         self.iterator = iterator
 
-        if hasattr(iterator, 'read'):
+        if hasattr(iterator, "read"):
             self._file = iterator
         else:
             self._file = _IteratorAsBinaryFile(iterator, encoding)
@@ -81,7 +79,7 @@ class StreamingIterator(object):
 
 
 class _IteratorAsBinaryFile(object):
-    def __init__(self, iterator, encoding='utf-8'):
+    def __init__(self, iterator, encoding="utf-8"):
         #: The iterator used to generate the upload data
         self.iterator = iterator
 
@@ -96,7 +94,7 @@ class _IteratorAsBinaryFile(object):
         try:
             return encode_with(next(self.iterator), self.encoding)
         except StopIteration:
-            return b''
+            return b""
 
     def _load_bytes(self, size):
         self._buffer.smart_truncate()
@@ -110,7 +108,7 @@ class _IteratorAsBinaryFile(object):
     def read(self, size=-1):
         size = int(size)
         if size == -1:
-            return b''.join(self.iterator)
+            return b"".join(self.iterator)
 
         self._load_bytes(size)
         return self._buffer.read(size)

@@ -37,7 +37,8 @@ class CaseInsensitiveDict(collections.MutableMapping):
     operations are given keys that have equal ``.lower()``s, the
     behavior is undefined.
     """
-    __slots__ = ('_store')
+
+    __slots__ = "_store"
 
     def __init__(self, data=None, **kwargs):
         self._store = collections.OrderedDict()
@@ -64,9 +65,7 @@ class CaseInsensitiveDict(collections.MutableMapping):
 
     def lower_items(self):
         """Like iteritems(), but with all lowercase keys."""
-        return (
-            (lowerkey, keyval[1]) for (lowerkey, keyval) in self._store.items()
-        )
+        return ((lowerkey, keyval[1]) for (lowerkey, keyval) in self._store.items())
 
     def __eq__(self, other):
         if isinstance(other, collections.Mapping):
@@ -76,7 +75,6 @@ class CaseInsensitiveDict(collections.MutableMapping):
 
         # Compare insensitively
         return dict(self.lower_items()) == dict(other.lower_items())
-
 
     # Copy is required
     def copy(self):
@@ -96,14 +94,13 @@ class HTTPHeaderDict(CaseInsensitiveDict):
         super(HTTPHeaderDict, self).__init__()
         self.extend({} if data is None else data, **kwargs)
 
-
     # We'll store tuples in the internal dictionary, but present them as a
     # concatenated string when we use item access methods.
     #
     def __setitem__(self, key, val):
         # Special–case null values.
         if (not isinstance(val, basestring)) and (val is not None):
-            raise ValueError('only string-type values (or None) are allowed')
+            raise ValueError("only string-type values (or None) are allowed")
 
         super(HTTPHeaderDict, self).__setitem__(key, (val,))
 
@@ -113,12 +110,10 @@ class HTTPHeaderDict(CaseInsensitiveDict):
         if len(val) == 1 and val[0] is None:
             return val[0]
 
-        return ', '.join(val)
+        return ", ".join(val)
 
     def lower_items(self):
-        return (
-            (lk, ', '.join(vals)) for (lk, (k, vals)) in self._store.items()
-        )
+        return ((lk, ", ".join(vals)) for (lk, (k, vals)) in self._store.items())
 
     def copy(self):
         return type(self)(self)
@@ -132,10 +127,10 @@ class HTTPHeaderDict(CaseInsensitiveDict):
         """Set a sequence of strings to the associated key - this will overwrite
         any previously stored value."""
         if not isinstance(values, (list, tuple)):
-            raise ValueError('argument is not sequence')
+            raise ValueError("argument is not sequence")
 
         if any(not isinstance(v, basestring) for v in values):
-            raise ValueError('non-string items in sequence')
+            raise ValueError("non-string items in sequence")
 
         if not values:
             self.pop(key, None)
@@ -157,7 +152,7 @@ class HTTPHeaderDict(CaseInsensitiveDict):
         value for this key, then the value will be appended to those values.
         """
         if not isinstance(val, basestring):
-            raise ValueError('value must be a string-type object')
+            raise ValueError("value must be a string-type object")
 
         self._extend(key, (val,))
 
@@ -168,8 +163,7 @@ class HTTPHeaderDict(CaseInsensitiveDict):
         """
         if len(args) > 1:
             raise TypeError(
-                f"extend() takes at most 1 positional "
-                "arguments ({len(args)} given)"
+                f"extend() takes at most 1 positional " "arguments ({len(args)} given)"
             )
 
         for other in args + (kwargs,):
@@ -177,7 +171,7 @@ class HTTPHeaderDict(CaseInsensitiveDict):
                 # See if looks like a HTTPHeaderDict (either urllib3's
                 # implementation or ours). If so, then we have to add values
                 # in one go for each key.
-                multiget = getattr(other, 'getlist', None)
+                multiget = getattr(other, "getlist", None)
                 if multiget:
                     for key in other:
                         self._extend(key, tuple(multiget(key)))
@@ -191,7 +185,7 @@ class HTTPHeaderDict(CaseInsensitiveDict):
                 if isinstance(iv, basestring):
                     self._extend(ik, (iv,))
                 elif any(not isinstance(v, basestring) for v in iv):
-                    raise ValueError('non-string items in sequence')
+                    raise ValueError("non-string items in sequence")
 
                 else:
                     self._extend(ik, tuple(iv))
@@ -216,7 +210,7 @@ class LookupDict(dict):
         super(LookupDict, self).__init__()
 
     def __repr__(self):
-        return f'<lookup \'{self.name}\'>'
+        return f"<lookup '{self.name}'>"
 
     def __getitem__(self, key):
         # We allow fall-through here, so values default to None

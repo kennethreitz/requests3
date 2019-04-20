@@ -9,7 +9,8 @@ from hashlib import md5, sha1, sha256
 
 from ..exceptions import SSLError, InsecurePlatformWarning, SNIMissingWarning
 from ..packages.ssl_match_hostname import (
-    match_hostname as _match_hostname, CertificateError
+    match_hostname as _match_hostname,
+    CertificateError,
 )
 
 SSLContext = None
@@ -34,9 +35,7 @@ def _const_compare_digest_backport(a, b):
     return result == 0
 
 
-_const_compare_digest = getattr(
-    hmac, 'compare_digest', _const_compare_digest_backport
-)
+_const_compare_digest = getattr(hmac, "compare_digest", _const_compare_digest_backport)
 try:  # Test for SSL features
     import ssl
     from ssl import wrap_socket, CERT_NONE, PROTOCOL_SSLv23
@@ -68,24 +67,24 @@ except ImportError:
 #   security,
 # - prefer AES-GCM over ChaCha20 because hardware-accelerated AES is common,
 # - disable NULL authentication, MD5 MACs and DSS for security reasons.
-DEFAULT_CIPHERS = ':'.join(
+DEFAULT_CIPHERS = ":".join(
     [
-        'TLS13-AES-256-GCM-SHA384',
-        'TLS13-CHACHA20-POLY1305-SHA256',
-        'TLS13-AES-128-GCM-SHA256',
-        'ECDH+AESGCM',
-        'ECDH+CHACHA20',
-        'DH+AESGCM',
-        'DH+CHACHA20',
-        'ECDH+AES256',
-        'DH+AES256',
-        'ECDH+AES128',
-        'DH+AES',
-        'RSA+AESGCM',
-        'RSA+AES',
-        '!aNULL',
-        '!eNULL',
-        '!MD5',
+        "TLS13-AES-256-GCM-SHA384",
+        "TLS13-CHACHA20-POLY1305-SHA256",
+        "TLS13-AES-128-GCM-SHA256",
+        "ECDH+AESGCM",
+        "ECDH+CHACHA20",
+        "DH+AESGCM",
+        "DH+CHACHA20",
+        "ECDH+AES256",
+        "DH+AES256",
+        "ECDH+AES128",
+        "DH+AES",
+        "RSA+AESGCM",
+        "RSA+AES",
+        "!aNULL",
+        "!eNULL",
+        "!MD5",
     ]
 )
 try:
@@ -95,7 +94,6 @@ except ImportError:
     # TODO: Can we remove this by choosing to support only platforms with
     # actual SSLContext objects?
     class SSLContext(object):  # Platform-specific: Python 2 & 3.1
-
         def __init__(self, protocol_version):
             self.protocol = protocol_version
             # Use default values from a real SSLContext
@@ -121,21 +119,21 @@ except ImportError:
 
         def wrap_socket(self, socket, server_hostname=None, server_side=False):
             warnings.warn(
-                'A true SSLContext object is not available. This prevents '
-                'urllib3 from configuring SSL appropriately and may cause '
-                'certain SSL connections to fail. You can upgrade to a newer '
-                'version of Python to solve this. For more information, see '
-                'https://urllib3.readthedocs.io/en/latest/advanced-usage.html'
-                '#ssl-warnings',
+                "A true SSLContext object is not available. This prevents "
+                "urllib3 from configuring SSL appropriately and may cause "
+                "certain SSL connections to fail. You can upgrade to a newer "
+                "version of Python to solve this. For more information, see "
+                "https://urllib3.readthedocs.io/en/latest/advanced-usage.html"
+                "#ssl-warnings",
                 InsecurePlatformWarning,
             )
             kwargs = {
-                'keyfile': self.keyfile,
-                'certfile': self.certfile,
-                'ca_certs': self.ca_certs,
-                'cert_reqs': self.verify_mode,
-                'ssl_version': self.protocol,
-                'server_side': server_side,
+                "keyfile": self.keyfile,
+                "certfile": self.certfile,
+                "ca_certs": self.ca_certs,
+                "cert_reqs": self.verify_mode,
+                "ssl_version": self.protocol,
+                "server_side": server_side,
             }
             return wrap_socket(socket, ciphers=self.ciphers, **kwargs)
 
@@ -149,13 +147,11 @@ def assert_fingerprint(cert, fingerprint):
     :param fingerprint:
         Fingerprint as string of hexdigits, can be interspersed by colons.
     """
-    fingerprint = fingerprint.replace(':', '').lower()
+    fingerprint = fingerprint.replace(":", "").lower()
     digest_length = len(fingerprint)
     hashfunc = HASHFUNC_MAP.get(digest_length)
     if not hashfunc:
-        raise SSLError(
-            'Fingerprint of invalid length: {0}'.format(fingerprint)
-        )
+        raise SSLError("Fingerprint of invalid length: {0}".format(fingerprint))
 
     # We need encode() here for py32; works on py2 and p33.
     fingerprint_bytes = unhexlify(fingerprint.encode())
@@ -185,7 +181,7 @@ def resolve_cert_reqs(candidate):
     if isinstance(candidate, str):
         res = getattr(ssl, candidate, None)
         if res is None:
-            res = getattr(ssl, 'CERT_' + candidate)
+            res = getattr(ssl, "CERT_" + candidate)
         return res
 
     return candidate
@@ -201,7 +197,7 @@ def resolve_ssl_version(candidate):
     if isinstance(candidate, str):
         res = getattr(ssl, candidate, None)
         if res is None:
-            res = getattr(ssl, 'PROTOCOL_' + candidate)
+            res = getattr(ssl, "PROTOCOL_" + candidate)
         return res
 
     return candidate
@@ -258,9 +254,9 @@ def create_urllib3_context(
     context.options |= options
     context.set_ciphers(ciphers or DEFAULT_CIPHERS)
     context.verify_mode = cert_reqs
-    if getattr(
-        context, 'check_hostname', None
-    ) is not None:  # Platform-specific: Python 3.2
+    if (
+        getattr(context, "check_hostname", None) is not None
+    ):  # Platform-specific: Python 3.2
         # We do our own verification, including fingerprints and alternative
         # hostnames. So disable it here
         context.check_hostname = False
@@ -294,7 +290,7 @@ def merge_context_settings(
 
             raise
 
-    elif getattr(context, 'load_default_certs', None) is not None:
+    elif getattr(context, "load_default_certs", None) is not None:
         # try to load OS default certs; works well on Windows (require Python3.4+)
         context.load_default_certs()
     if certfile:
@@ -335,9 +331,7 @@ def ssl_wrap_socket(
         # Note: This branch of code and all the variables in it are no longer
         # used by urllib3 itself. We should consider deprecating and removing
         # this code.
-        context = create_urllib3_context(
-            ssl_version, cert_reqs, ciphers=ciphers
-        )
+        context = create_urllib3_context(ssl_version, cert_reqs, ciphers=ciphers)
     if ca_certs or ca_cert_dir:
         try:
             context.load_verify_locations(ca_certs, ca_cert_dir)
@@ -352,7 +346,7 @@ def ssl_wrap_socket(
 
             raise
 
-    elif getattr(context, 'load_default_certs', None) is not None:
+    elif getattr(context, "load_default_certs", None) is not None:
         # try to load OS default certs; works well on Windows (require Python3.4+)
         context.load_default_certs()
     if certfile:
@@ -361,13 +355,13 @@ def ssl_wrap_socket(
         return context.wrap_socket(sock, server_hostname=server_hostname)
 
     warnings.warn(
-        'An HTTPS request has been made, but the SNI (Server Name '
-        'Indication) extension to TLS is not available on this platform. '
-        'This may cause the server to present an incorrect TLS '
-        'certificate, which can cause validation failures. You can upgrade to '
-        'a newer version of Python to solve this. For more information, see '
-        'https://urllib3.readthedocs.io/en/latest/advanced-usage.html'
-        '#ssl-warnings',
+        "An HTTPS request has been made, but the SNI (Server Name "
+        "Indication) extension to TLS is not available on this platform. "
+        "This may cause the server to present an incorrect TLS "
+        "certificate, which can cause validation failures. You can upgrade to "
+        "a newer version of Python to solve this. For more information, see "
+        "https://urllib3.readthedocs.io/en/latest/advanced-usage.html"
+        "#ssl-warnings",
         SNIMissingWarning,
     )
     return context.wrap_socket(sock)
@@ -378,8 +372,7 @@ def match_hostname(cert, asserted_hostname):
         _match_hostname(cert, asserted_hostname)
     except CertificateError as e:
         log.error(
-            'Certificate did not match expected hostname: %s. '
-            'Certificate: %s',
+            "Certificate did not match expected hostname: %s. " "Certificate: %s",
             asserted_hostname,
             cert,
         )

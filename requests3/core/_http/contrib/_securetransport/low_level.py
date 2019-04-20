@@ -70,11 +70,11 @@ def _cf_string_to_unicode(value):
             value_as_void_p, buffer, 1024, CFConst.kCFStringEncodingUTF8
         )
         if not result:
-            raise OSError('Error copying C string from CFStringRef')
+            raise OSError("Error copying C string from CFStringRef")
 
         string = buffer.value
     if string is not None:
-        string = string.decode('utf-8')
+        string = string.decode("utf-8")
     return string
 
 
@@ -89,8 +89,8 @@ def _assert_no_error(error, exception_class=None):
     cf_error_string = Security.SecCopyErrorMessageString(error, None)
     output = _cf_string_to_unicode(cf_error_string)
     CoreFoundation.CFRelease(cf_error_string)
-    if output is None or output == u'':
-        output = u'OSStatus %s' % error
+    if output is None or output == u"":
+        output = u"OSStatus %s" % error
     if exception_class is None:
         exception_class = ssl.SSLError
     raise exception_class(output)
@@ -102,8 +102,7 @@ def _cert_array_from_pem(pem_bundle):
     that can be used to validate a cert chain.
     """
     der_certs = [
-        base64.b64decode(match.group(1))
-        for match in _PEM_CERTS_RE.finditer(pem_bundle)
+        base64.b64decode(match.group(1)) for match in _PEM_CERTS_RE.finditer(pem_bundle)
     ]
     if not der_certs:
         raise ssl.SSLError("No root certificates specified")
@@ -173,19 +172,14 @@ def _temporary_keychain():
     # some random bytes to password-protect the keychain we're creating, so we
     # ask for 40 random bytes.
     random_bytes = os.urandom(40)
-    filename = base64.b64encode(random_bytes[:8]).decode('utf-8')
+    filename = base64.b64encode(random_bytes[:8]).decode("utf-8")
     password = base64.b64encode(random_bytes[8:])  # Must be valid UTF-8
     tempdirectory = tempfile.mkdtemp()
-    keychain_path = os.path.join(tempdirectory, filename).encode('utf-8')
+    keychain_path = os.path.join(tempdirectory, filename).encode("utf-8")
     # We now want to create the keychain itself.
     keychain = Security.SecKeychainRef()
     status = Security.SecKeychainCreate(
-        keychain_path,
-        len(password),
-        password,
-        False,
-        None,
-        ctypes.byref(keychain),
+        keychain_path, len(password), password, False, None, ctypes.byref(keychain)
     )
     _assert_no_error(status)
     # Having created the keychain, we want to pass it off to the caller.
@@ -202,7 +196,7 @@ def _load_items_from_file(keychain, path):
     certificates = []
     identities = []
     result_array = None
-    with open(path, 'rb') as f:
+    with open(path, "rb") as f:
         raw_filedata = f.read()
     try:
         filedata = CoreFoundation.CFDataCreate(
@@ -279,9 +273,7 @@ def _load_client_cert_chain(keychain, *paths):
     paths = (path for path in paths if path)
     try:
         for file_path in paths:
-            new_identities, new_certs = _load_items_from_file(
-                keychain, file_path
-            )
+            new_identities, new_certs = _load_items_from_file(keychain, file_path)
             identities.extend(new_identities)
             certificates.extend(new_certs)
         # Ok, we have everything. The question is: do we have an identity? If

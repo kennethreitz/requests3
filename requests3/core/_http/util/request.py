@@ -4,7 +4,7 @@ from base64 import b64encode
 from ..packages.six import b, integer_types
 from ..exceptions import UnrewindableBodyError
 
-ACCEPT_ENCODING = 'gzip,deflate'
+ACCEPT_ENCODING = "gzip,deflate"
 _FAILEDTELL = object()
 
 
@@ -55,26 +55,22 @@ def make_headers(
         if isinstance(accept_encoding, str):
             pass
         elif isinstance(accept_encoding, list):
-            accept_encoding = ','.join(accept_encoding)
+            accept_encoding = ",".join(accept_encoding)
         else:
             accept_encoding = ACCEPT_ENCODING
-        headers['accept-encoding'] = accept_encoding
+        headers["accept-encoding"] = accept_encoding
     if user_agent:
-        headers['user-agent'] = user_agent
+        headers["user-agent"] = user_agent
     if keep_alive:
-        headers['connection'] = 'keep-alive'
+        headers["connection"] = "keep-alive"
     if basic_auth:
-        headers['authorization'] = 'Basic ' + b64encode(b(basic_auth)).decode(
-            'utf-8'
-        )
+        headers["authorization"] = "Basic " + b64encode(b(basic_auth)).decode("utf-8")
     if proxy_basic_auth:
-        headers['proxy-authorization'] = 'Basic ' + b64encode(
+        headers["proxy-authorization"] = "Basic " + b64encode(
             b(proxy_basic_auth)
-        ).decode(
-            'utf-8'
-        )
+        ).decode("utf-8")
     if disable_cache:
-        headers['cache-control'] = 'no-cache'
+        headers["cache-control"] = "no-cache"
     return headers
 
 
@@ -85,7 +81,7 @@ def set_file_position(body, pos):
     """
     if pos is not None:
         rewind_body(body, pos)
-    elif getattr(body, 'tell', None) is not None:
+    elif getattr(body, "tell", None) is not None:
         try:
             pos = body.tell()
         except (IOError, OSError):
@@ -106,14 +102,13 @@ def rewind_body(body, body_pos):
     :param int pos:
         Position to seek to in file.
     """
-    body_seek = getattr(body, 'seek', None)
+    body_seek = getattr(body, "seek", None)
     if body_seek is not None and isinstance(body_pos, integer_types):
         try:
             body_seek(body_pos)
         except (IOError, OSError):
             raise UnrewindableBodyError(
-                "An error occurred when rewinding request "
-                "body for redirect/retry."
+                "An error occurred when rewinding request " "body for redirect/retry."
             )
 
     elif body_pos is _FAILEDTELL:
@@ -124,6 +119,5 @@ def rewind_body(body, body_pos):
 
     else:
         raise ValueError(
-            "body_pos must be of type integer, "
-            "instead it was %s." % type(body_pos)
+            "body_pos must be of type integer, " "instead it was %s." % type(body_pos)
         )

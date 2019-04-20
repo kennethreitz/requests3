@@ -6,8 +6,8 @@ from ._sync.connectionpool import (
 )
 
 __all__ = [
-    'ConnectionPool',
-    'HTTPConnectionPool',
-    'HTTPSConnectionPool',
-    'connection_from_url',
+    "ConnectionPool",
+    "HTTPConnectionPool",
+    "HTTPSConnectionPool",
+    "connection_from_url",
 ]

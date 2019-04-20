@@ -9,8 +9,8 @@ from .. import exceptions as exc
 # cd2c97bb0a076da2322f11adce0b2731f9193396 L62-L64
 _QUOTED_STRING_RE = r'"[^"\\]*(?:\\.[^"\\]*)*"'
 _OPTION_HEADER_PIECE_RE = re.compile(
-    r';\s*(%s|[^\s;=]+)\s*(?:=\s*(%s|[^;]+))?\s*' % (_QUOTED_STRING_RE,
-                                                     _QUOTED_STRING_RE)
+    r";\s*(%s|[^\s;=]+)\s*(?:=\s*(%s|[^;]+))?\s*"
+    % (_QUOTED_STRING_RE, _QUOTED_STRING_RE)
 )
 _DEFAULT_CHUNKSIZE = 512
 
@@ -18,7 +18,7 @@ _DEFAULT_CHUNKSIZE = 512
 def _get_filename(content_disposition):
     for match in _OPTION_HEADER_PIECE_RE.finditer(content_disposition):
         k, v = match.groups()
-        if k == 'filename':
+        if k == "filename":
             # ignore any directory paths in the filename
             return os.path.split(v)[1]
     return None
@@ -52,10 +52,10 @@ def get_download_file_path(response, path):
         filepath = path
     else:
         response_filename = _get_filename(
-            response.headers.get('content-disposition', '')
+            response.headers.get("content-disposition", "")
         )
         if not response_filename:
-            raise exc.StreamingError('No filename given to stream response to')
+            raise exc.StreamingError("No filename given to stream response to")
 
         if path_is_dir:
             # directory to download to
@@ -157,15 +157,15 @@ def stream_response_to_file(response, path=None, chunksize=_DEFAULT_CHUNKSIZE):
     pre_opened = False
     fd = None
     filename = None
-    if path and callable(getattr(path, 'write', None)):
+    if path and callable(getattr(path, "write", None)):
         pre_opened = True
         fd = path
-        filename = getattr(fd, 'name', None)
+        filename = getattr(fd, "name", None)
     else:
         filename = get_download_file_path(response, path)
         if os.path.exists(filename):
             raise exc.StreamingError("File already exists: %s" % filename)
-        fd = open(filename, 'wb')
+        fd = open(filename, "wb")
 
     for chunk in response.iter_content(chunk_size=chunksize):
         fd.write(chunk)

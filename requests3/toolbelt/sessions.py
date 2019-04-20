@@ -61,9 +61,7 @@ class BaseUrlSession(requests.Session):
     def request(self, method, url, *args, **kwargs):
         """Send the request after generating the complete URL."""
         url = self.create_url(url)
-        return super(BaseUrlSession, self).request(
-            method, url, *args, **kwargs
-        )
+        return super(BaseUrlSession, self).request(method, url, *args, **kwargs)
 
     def create_url(self, url):
         """Create the URL based off this partial path."""

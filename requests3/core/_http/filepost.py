@@ -7,7 +7,7 @@ from .packages import six
 from .packages.six import b
 from .fields import RequestField
 
-writer = codecs.lookup('utf-8')[3]
+writer = codecs.lookup("utf-8")[3]
 
 
 def choose_boundary():
@@ -22,6 +22,7 @@ def choose_boundary():
     to affect our entire library.
     """
     from uuid import uuid4
+
     return uuid4().hex
 
 
@@ -78,7 +79,7 @@ def encode_multipart_formdata(fields, boundary=None):
     if boundary is None:
         boundary = choose_boundary()
     for field in iter_field_objects(fields):
-        body.write(b('--%s\r\n' % (boundary)))
+        body.write(b("--%s\r\n" % (boundary)))
         writer(body).write(field.render_headers())
         data = field.data
         if isinstance(data, int):
@@ -87,7 +88,7 @@ def encode_multipart_formdata(fields, boundary=None):
             writer(body).write(data)
         else:
             body.write(data)
-        body.write(b'\r\n')
-    body.write(b('--%s--\r\n' % (boundary)))
-    content_type = str('multipart/form-data; boundary=%s' % boundary)
+        body.write(b"\r\n")
+    body.write(b("--%s--\r\n" % (boundary)))
+    content_type = str("multipart/form-data; boundary=%s" % boundary)
     return body.getvalue(), content_type

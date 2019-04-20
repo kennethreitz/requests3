@@ -46,20 +46,20 @@ from ctypes import (
 )
 from ctypes import CDLL, POINTER, CFUNCTYPE
 
-security_path = find_library('Security')
+security_path = find_library("Security")
 if not security_path:
-    raise ImportError('The library Security could not be found')
+    raise ImportError("The library Security could not be found")
 
-core_foundation_path = find_library('CoreFoundation')
+core_foundation_path = find_library("CoreFoundation")
 if not core_foundation_path:
-    raise ImportError('The library CoreFoundation could not be found')
+    raise ImportError("The library CoreFoundation could not be found")
 
 version = platform.mac_ver()[0]
-version_info = tuple(map(int, version.split('.')))
+version_info = tuple(map(int, version.split(".")))
 if version_info < (10, 8):
     raise OSError(
-        'Only OS X 10.8 and newer are supported, not %s.%s' %
-        (version_info[0], version_info[1])
+        "Only OS X 10.8 and newer are supported, not %s.%s"
+        % (version_info[0], version_info[1])
     )
 
 Security = CDLL(security_path, use_errno=True)
@@ -121,16 +121,16 @@ try:
     Security.SecIdentityGetTypeID.restype = CFTypeID
     Security.SecKeyGetTypeID.argtypes = []
     Security.SecKeyGetTypeID.restype = CFTypeID
-    Security.SecCertificateCreateWithData.argtypes = [
-        CFAllocatorRef, CFDataRef
-    ]
+    Security.SecCertificateCreateWithData.argtypes = [CFAllocatorRef, CFDataRef]
     Security.SecCertificateCreateWithData.restype = SecCertificateRef
     Security.SecCertificateCopyData.argtypes = [SecCertificateRef]
     Security.SecCertificateCopyData.restype = CFDataRef
     Security.SecCopyErrorMessageString.argtypes = [OSStatus, c_void_p]
     Security.SecCopyErrorMessageString.restype = CFStringRef
     Security.SecIdentityCreateWithCertificate.argtypes = [
-        CFTypeRef, SecCertificateRef, POINTER(SecIdentityRef)
+        CFTypeRef,
+        SecCertificateRef,
+        POINTER(SecIdentityRef),
     ]
     Security.SecIdentityCreateWithCertificate.restype = OSStatus
     Security.SecKeychainCreate.argtypes = [
@@ -145,96 +145,83 @@ try:
     Security.SecKeychainDelete.argtypes = [SecKeychainRef]
     Security.SecKeychainDelete.restype = OSStatus
     Security.SecPKCS12Import.argtypes = [
-        CFDataRef, CFDictionaryRef, POINTER(CFArrayRef)
+        CFDataRef,
+        CFDictionaryRef,
+        POINTER(CFArrayRef),
     ]
     Security.SecPKCS12Import.restype = OSStatus
-    SSLReadFunc = CFUNCTYPE(
-        OSStatus, SSLConnectionRef, c_void_p, POINTER(c_size_t)
-    )
+    SSLReadFunc = CFUNCTYPE(OSStatus, SSLConnectionRef, c_void_p, POINTER(c_size_t))
     SSLWriteFunc = CFUNCTYPE(
         OSStatus, SSLConnectionRef, POINTER(c_byte), POINTER(c_size_t)
     )
-    Security.SSLSetIOFuncs.argtypes = [
-        SSLContextRef, SSLReadFunc, SSLWriteFunc
-    ]
+    Security.SSLSetIOFuncs.argtypes = [SSLContextRef, SSLReadFunc, SSLWriteFunc]
     Security.SSLSetIOFuncs.restype = OSStatus
     Security.SSLSetPeerID.argtypes = [SSLContextRef, c_char_p, c_size_t]
     Security.SSLSetPeerID.restype = OSStatus
     Security.SSLSetCertificate.argtypes = [SSLContextRef, CFArrayRef]
     Security.SSLSetCertificate.restype = OSStatus
-    Security.SSLSetCertificateAuthorities.argtypes = [
-        SSLContextRef, CFTypeRef, Boolean
-    ]
+    Security.SSLSetCertificateAuthorities.argtypes = [SSLContextRef, CFTypeRef, Boolean]
     Security.SSLSetCertificateAuthorities.restype = OSStatus
     Security.SSLSetConnection.argtypes = [SSLContextRef, SSLConnectionRef]
     Security.SSLSetConnection.restype = OSStatus
-    Security.SSLSetPeerDomainName.argtypes = [
-        SSLContextRef, c_char_p, c_size_t
-    ]
+    Security.SSLSetPeerDomainName.argtypes = [SSLContextRef, c_char_p, c_size_t]
     Security.SSLSetPeerDomainName.restype = OSStatus
     Security.SSLHandshake.argtypes = [SSLContextRef]
     Security.SSLHandshake.restype = OSStatus
-    Security.SSLRead.argtypes = [
-        SSLContextRef, c_char_p, c_size_t, POINTER(c_size_t)
-    ]
+    Security.SSLRead.argtypes = [SSLContextRef, c_char_p, c_size_t, POINTER(c_size_t)]
     Security.SSLRead.restype = OSStatus
-    Security.SSLWrite.argtypes = [
-        SSLContextRef, c_char_p, c_size_t, POINTER(c_size_t)
-    ]
+    Security.SSLWrite.argtypes = [SSLContextRef, c_char_p, c_size_t, POINTER(c_size_t)]
     Security.SSLWrite.restype = OSStatus
     Security.SSLClose.argtypes = [SSLContextRef]
     Security.SSLClose.restype = OSStatus
-    Security.SSLGetNumberSupportedCiphers.argtypes = [
-        SSLContextRef, POINTER(c_size_t)
-    ]
+    Security.SSLGetNumberSupportedCiphers.argtypes = [SSLContextRef, POINTER(c_size_t)]
     Security.SSLGetNumberSupportedCiphers.restype = OSStatus
     Security.SSLGetSupportedCiphers.argtypes = [
-        SSLContextRef, POINTER(SSLCipherSuite), POINTER(c_size_t)
+        SSLContextRef,
+        POINTER(SSLCipherSuite),
+        POINTER(c_size_t),
     ]
     Security.SSLGetSupportedCiphers.restype = OSStatus
     Security.SSLSetEnabledCiphers.argtypes = [
-        SSLContextRef, POINTER(SSLCipherSuite), c_size_t
+        SSLContextRef,
+        POINTER(SSLCipherSuite),
+        c_size_t,
     ]
     Security.SSLSetEnabledCiphers.restype = OSStatus
-    Security.SSLGetNumberEnabledCiphers.argtype = [
-        SSLContextRef, POINTER(c_size_t)
-    ]
+    Security.SSLGetNumberEnabledCiphers.argtype = [SSLContextRef, POINTER(c_size_t)]
     Security.SSLGetNumberEnabledCiphers.restype = OSStatus
     Security.SSLGetEnabledCiphers.argtypes = [
-        SSLContextRef, POINTER(SSLCipherSuite), POINTER(c_size_t)
+        SSLContextRef,
+        POINTER(SSLCipherSuite),
+        POINTER(c_size_t),
     ]
     Security.SSLGetEnabledCiphers.restype = OSStatus
-    Security.SSLGetNegotiatedCipher.argtypes = [
-        SSLContextRef, POINTER(SSLCipherSuite)
-    ]
+    Security.SSLGetNegotiatedCipher.argtypes = [SSLContextRef, POINTER(SSLCipherSuite)]
     Security.SSLGetNegotiatedCipher.restype = OSStatus
     Security.SSLGetNegotiatedProtocolVersion.argtypes = [
-        SSLContextRef, POINTER(SSLProtocol)
+        SSLContextRef,
+        POINTER(SSLProtocol),
     ]
     Security.SSLGetNegotiatedProtocolVersion.restype = OSStatus
     Security.SSLCopyPeerTrust.argtypes = [SSLContextRef, POINTER(SecTrustRef)]
     Security.SSLCopyPeerTrust.restype = OSStatus
     Security.SecTrustSetAnchorCertificates.argtypes = [SecTrustRef, CFArrayRef]
     Security.SecTrustSetAnchorCertificates.restype = OSStatus
-    Security.SecTrustSetAnchorCertificatesOnly.argstypes = [
-        SecTrustRef, Boolean
-    ]
+    Security.SecTrustSetAnchorCertificatesOnly.argstypes = [SecTrustRef, Boolean]
     Security.SecTrustSetAnchorCertificatesOnly.restype = OSStatus
-    Security.SecTrustEvaluate.argtypes = [
-        SecTrustRef, POINTER(SecTrustResultType)
-    ]
+    Security.SecTrustEvaluate.argtypes = [SecTrustRef, POINTER(SecTrustResultType)]
     Security.SecTrustEvaluate.restype = OSStatus
     Security.SecTrustGetCertificateCount.argtypes = [SecTrustRef]
     Security.SecTrustGetCertificateCount.restype = CFIndex
     Security.SecTrustGetCertificateAtIndex.argtypes = [SecTrustRef, CFIndex]
     Security.SecTrustGetCertificateAtIndex.restype = SecCertificateRef
     Security.SSLCreateContext.argtypes = [
-        CFAllocatorRef, SSLProtocolSide, SSLConnectionType
+        CFAllocatorRef,
+        SSLProtocolSide,
+        SSLConnectionType,
     ]
     Security.SSLCreateContext.restype = SSLContextRef
-    Security.SSLSetSessionOption.argtypes = [
-        SSLContextRef, SSLSessionOption, Boolean
-    ]
+    Security.SSLSetSessionOption.argtypes = [SSLContextRef, SSLSessionOption, Boolean]
     Security.SSLSetSessionOption.restype = OSStatus
     Security.SSLSetProtocolVersionMin.argtypes = [SSLContextRef, SSLProtocol]
     Security.SSLSetProtocolVersionMin.restype = OSStatus
@@ -254,10 +241,10 @@ try:
     Security.SecExternalFormat = SecExternalFormat
     Security.OSStatus = OSStatus
     Security.kSecImportExportPassphrase = CFStringRef.in_dll(
-        Security, 'kSecImportExportPassphrase'
+        Security, "kSecImportExportPassphrase"
     )
     Security.kSecImportItemIdentity = CFStringRef.in_dll(
-        Security, 'kSecImportItemIdentity'
+        Security, "kSecImportItemIdentity"
     )
     # CoreFoundation time!
     CoreFoundation.CFRetain.argtypes = [CFTypeRef]
@@ -267,15 +254,18 @@ try:
     CoreFoundation.CFGetTypeID.argtypes = [CFTypeRef]
     CoreFoundation.CFGetTypeID.restype = CFTypeID
     CoreFoundation.CFStringCreateWithCString.argtypes = [
-        CFAllocatorRef, c_char_p, CFStringEncoding
+        CFAllocatorRef,
+        c_char_p,
+        CFStringEncoding,
     ]
     CoreFoundation.CFStringCreateWithCString.restype = CFStringRef
-    CoreFoundation.CFStringGetCStringPtr.argtypes = [
-        CFStringRef, CFStringEncoding
-    ]
+    CoreFoundation.CFStringGetCStringPtr.argtypes = [CFStringRef, CFStringEncoding]
     CoreFoundation.CFStringGetCStringPtr.restype = c_char_p
     CoreFoundation.CFStringGetCString.argtypes = [
-        CFStringRef, c_char_p, CFIndex, CFStringEncoding
+        CFStringRef,
+        c_char_p,
+        CFIndex,
+        CFStringEncoding,
     ]
     CoreFoundation.CFStringGetCString.restype = c_bool
     CoreFoundation.CFDataCreate.argtypes = [CFAllocatorRef, c_char_p, CFIndex]
@@ -296,11 +286,16 @@ try:
     CoreFoundation.CFDictionaryGetValue.argtypes = [CFDictionaryRef, CFTypeRef]
     CoreFoundation.CFDictionaryGetValue.restype = CFTypeRef
     CoreFoundation.CFArrayCreate.argtypes = [
-        CFAllocatorRef, POINTER(CFTypeRef), CFIndex, CFArrayCallBacks
+        CFAllocatorRef,
+        POINTER(CFTypeRef),
+        CFIndex,
+        CFArrayCallBacks,
     ]
     CoreFoundation.CFArrayCreate.restype = CFArrayRef
     CoreFoundation.CFArrayCreateMutable.argtypes = [
-        CFAllocatorRef, CFIndex, CFArrayCallBacks
+        CFAllocatorRef,
+        CFIndex,
+        CFArrayCallBacks,
     ]
     CoreFoundation.CFArrayCreateMutable.restype = CFMutableArrayRef
     CoreFoundation.CFArrayAppendValue.argtypes = [CFMutableArrayRef, c_void_p]
@@ -310,23 +305,23 @@ try:
     CoreFoundation.CFArrayGetValueAtIndex.argtypes = [CFArrayRef, CFIndex]
     CoreFoundation.CFArrayGetValueAtIndex.restype = c_void_p
     CoreFoundation.kCFAllocatorDefault = CFAllocatorRef.in_dll(
-        CoreFoundation, 'kCFAllocatorDefault'
+        CoreFoundation, "kCFAllocatorDefault"
     )
     CoreFoundation.kCFTypeArrayCallBacks = c_void_p.in_dll(
-        CoreFoundation, 'kCFTypeArrayCallBacks'
+        CoreFoundation, "kCFTypeArrayCallBacks"
     )
     CoreFoundation.kCFTypeDictionaryKeyCallBacks = c_void_p.in_dll(
-        CoreFoundation, 'kCFTypeDictionaryKeyCallBacks'
+        CoreFoundation, "kCFTypeDictionaryKeyCallBacks"
     )
     CoreFoundation.kCFTypeDictionaryValueCallBacks = c_void_p.in_dll(
-        CoreFoundation, 'kCFTypeDictionaryValueCallBacks'
+        CoreFoundation, "kCFTypeDictionaryValueCallBacks"
     )
     CoreFoundation.CFTypeRef = CFTypeRef
     CoreFoundation.CFArrayRef = CFArrayRef
     CoreFoundation.CFStringRef = CFStringRef
     CoreFoundation.CFDictionaryRef = CFDictionaryRef
 except (AttributeError):
-    raise ImportError('Error initializing ctypes')
+    raise ImportError("Error initializing ctypes")
 
 
 class CFConst(object):
@@ -334,6 +329,7 @@ class CFConst(object):
     A class object that acts as essentially a namespace for CoreFoundation
     constants.
     """
+
     kCFStringEncodingUTF8 = CFStringEncoding(0x08000100)
 
 
@@ -341,6 +337,7 @@ class SecurityConst(object):
     """
     A class object that acts as essentially a namespace for Security constants.
     """
+
     kSSLSessionOptionBreakOnServerAuth = 0
     kSSLProtocol2 = 1
     kSSLProtocol3 = 2

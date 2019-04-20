@@ -21,15 +21,14 @@ try:
     monotonic = time.monotonic
 except (AttributeError, ImportError):  # Python 3.3<
     monotonic = time.time
-EVENT_READ = (1 << 0)
-EVENT_WRITE = (1 << 1)
+EVENT_READ = 1 << 0
+EVENT_WRITE = 1 << 1
 HAS_SELECT = True  # Variable that shows whether the platform has a selector.
 _SYSCALL_SENTINEL = object()  # Sentinel in case a system call returns None.
 _DEFAULT_SELECTOR = None
 
 
 class SelectorError(Exception):
-
     def __init__(self, errcode):
         super(SelectorError, self).__init__()
         self.errno = errcode
@@ -94,9 +93,7 @@ else:
                 expires = monotonic() + timeout
         args = list(args)
         if recalc_timeout and "timeout" not in kwargs:
-            raise ValueError(
-                "Timeout must be in args or kwargs to be recalculated"
-            )
+            raise ValueError("Timeout must be in args or kwargs to be recalculated")
 
         result = _SYSCALL_SENTINEL
         while result is _SYSCALL_SENTINEL:
@@ -114,9 +111,8 @@ else:
                 elif hasattr(e, "args"):
                     errcode = e.args[0]
                 # Also test for the Windows equivalent of EINTR.
-                is_interrupt = (
-                    errcode == errno.EINTR or
-                    (hasattr(errno, "WSAEINTR") and errcode == errno.WSAEINTR)
+                is_interrupt = errcode == errno.EINTR or (
+                    hasattr(errno, "WSAEINTR") and errcode == errno.WSAEINTR
                 )
                 if is_interrupt:
                     if expires is not None:
@@ -138,7 +134,7 @@ else:
         return result
 
 
-SelectorKey = namedtuple('SelectorKey', ['fileobj', 'fd', 'events', 'data'])
+SelectorKey = namedtuple("SelectorKey", ["fileobj", "fd", "events", "data"])
 
 
 class _SelectorMapping(Mapping):
@@ -393,9 +389,7 @@ if hasattr(select, "poll"):
 
         def select(self, timeout=None):
             ready = []
-            fd_events = _syscall_wrapper(
-                self._wrap_poll, True, timeout=timeout
-            )
+            fd_events = _syscall_wrapper(self._wrap_poll, True, timeout=timeout)
             for fd, event_mask in fd_events:
                 events = 0
                 if event_mask & ~select.POLLIN:
@@ -489,14 +483,10 @@ if hasattr(select, "kqueue"):
         def register(self, fileobj, events, data=None):
             key = super(KqueueSelector, self).register(fileobj, events, data)
             if events & EVENT_READ:
-                kevent = select.kevent(
-                    key.fd, select.KQ_FILTER_READ, select.KQ_EV_ADD
-                )
+                kevent = select.kevent(key.fd, select.KQ_FILTER_READ, select.KQ_EV_ADD)
                 _syscall_wrapper(self._kqueue.control, False, [kevent], 0, 0)
             if events & EVENT_WRITE:
-                kevent = select.kevent(
-                    key.fd, select.KQ_FILTER_WRITE, select.KQ_EV_ADD
-                )
+                kevent = select.kevent(key.fd, select.KQ_FILTER_WRITE, select.KQ_EV_ADD)
                 _syscall_wrapper(self._kqueue.control, False, [kevent], 0, 0)
             return key
 
@@ -507,9 +497,7 @@ if hasattr(select, "kqueue"):
                     key.fd, select.KQ_FILTER_READ, select.KQ_EV_DELETE
                 )
                 try:
-                    _syscall_wrapper(
-                        self._kqueue.control, False, [kevent], 0, 0
-                    )
+                    _syscall_wrapper(self._kqueue.control, False, [kevent], 0, 0)
                 except SelectorError:
                     pass
             if key.events & EVENT_WRITE:
@@ -517,9 +505,7 @@ if hasattr(select, "kqueue"):
                     key.fd, select.KQ_FILTER_WRITE, select.KQ_EV_DELETE
                 )
                 try:
-                    _syscall_wrapper(
-                        self._kqueue.control, False, [kevent], 0, 0
-                    )
+                    _syscall_wrapper(self._kqueue.control, False, [kevent], 0, 0)
                 except SelectorError:
                     pass
             return key
@@ -546,9 +532,7 @@ if hasattr(select, "kqueue"):
                         ready_fds[key.fd] = (key, events & key.events)
                     else:
                         old_events = ready_fds[key.fd][1]
-                        ready_fds[key.fd] = (
-                            key, (events | old_events) & key.events
-                        )
+                        ready_fds[key.fd] = (key, (events | old_events) & key.events)
             return list(ready_fds.values())
 
         def close(self):
@@ -556,7 +540,7 @@ if hasattr(select, "kqueue"):
             super(KqueueSelector, self).close()
 
 
-if not hasattr(select, 'select'):  # Platform-specific: AppEngine
+if not hasattr(select, "select"):  # Platform-specific: AppEngine
     HAS_SELECT = False
 
 
@@ -567,7 +551,7 @@ def _can_allocate(struct):
     don't have it available will not advertise it. (ie: GAE) """
     try:
         # select.poll() objects won't fail until used.
-        if struct == 'poll':
+        if struct == "poll":
             p = select.poll()
             p.poll(0)
         # All others will fail on allocation.
@@ -579,8 +563,6 @@ def _can_allocate(struct):
         return False
 
 
-
-
 # Choose the best implementation, roughly:
 # kqueue == epoll > poll > select. Devpoll not supported. (See above)
 # select() also can't accept a FD > FD_SETSIZE (usually around 1024)
@@ -590,15 +572,15 @@ def DefaultSelector():
     by eventlet, greenlet, and preserve proper behavior. """
     global _DEFAULT_SELECTOR
     if _DEFAULT_SELECTOR is None:
-        if _can_allocate('kqueue'):
+        if _can_allocate("kqueue"):
             _DEFAULT_SELECTOR = KqueueSelector
-        elif _can_allocate('epoll'):
+        elif _can_allocate("epoll"):
             _DEFAULT_SELECTOR = EpollSelector
-        elif _can_allocate('poll'):
+        elif _can_allocate("poll"):
             _DEFAULT_SELECTOR = PollSelector
-        elif hasattr(select, 'select'):
+        elif hasattr(select, "select"):
             _DEFAULT_SELECTOR = SelectSelector
         else:  # Platform-specific: AppEngine
-            raise ValueError('Platform does not have a selector')
+            raise ValueError("Platform does not have a selector")
 
     return _DEFAULT_SELECTOR()
