@@ -15,7 +15,7 @@ Requests III: HTTP for Humans and Machines, alike.
 
 Behold, the power of Requests III:
 
-``` {.sourceCode .pycon}
+```pycon
 >>> from requests import HTTPSession
 
 # Make a connection pool.
