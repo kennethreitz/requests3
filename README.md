@@ -4,7 +4,7 @@ Requests: HTTP for Humans™
 [![image](https://img.shields.io/pypi/v/requests3.svg)](https://pypi.org/project/requests/)
 [![image](https://img.shields.io/pypi/l/requests3.svg)](https://pypi.org/project/requests/)
 [![image](https://img.shields.io/pypi/pyversions/requests3.svg)](https://pypi.org/project/requests/)
-[![image](https://img.shields.io/github/contributors/kennethrietz/requests3.svg)](https://github.com/requests/requests/graphs/contributors)
+[![image](https://img.shields.io/github/contributors/kennethreitz/requests3.svg)](https://github.com/requests/requests/graphs/contributors)
 [![image](https://img.shields.io/badge/Say%20Thanks-!-1EAEDB.svg)](https://saythanks.io/to/kennethreitz)
 
 **If you're interested in financially supporting Requests 3 development, please [make a donation](https://cash.me/$KennethReitz). Your support helps tremendously with sustainability of motivation.**
