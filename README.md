@@ -25,6 +25,7 @@ Behold, the power of Requests III:
 >>> r = http.request('get', 'https://httpbin.org/ip')
 >>> r.json()
 {'ip': '172.69.48.124'}
+```
 
 [![image](https://raw.githubusercontent.com/requests/requests/master/docs/_static/requests-logo-small.png)](http://docs.python-requests.org/)
 
