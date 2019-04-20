@@ -20,7 +20,7 @@ Release v\ |version|. (:ref:`Installation <install>`)
 .. image:: https://img.shields.io/badge/Say%20Thanks!-🦉-1EAEDB.svg
     :target: https://saythanks.io/to/kennethreitz
 
-**Requests III** is an HTTP library for Python, built for Humans and Machines, alike. **This repository is a work in progress, and the expected release timeline is "before PyCon 2020"**.
+**Requests III** is an HTTP library for Python, built for Humans and Machines, alike. This repository is a work in progress, and the expected release timeline is "before PyCon 2020".
 
 .. note:: If you're interested in financially supporting Requests 3 development, please `make a donation <https://cash.me/$KennethReitz>`_.
 
