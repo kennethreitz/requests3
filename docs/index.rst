@@ -28,21 +28,19 @@ If you're on the job market, consider taking `this programming quiz <https://tri
 
 -------------------
 
-Behold, the power of Requests III:
+Behold, the power of Requests III::
 
-```pycon
->>> from requests import HTTPSession
+    >>> from requests import HTTPSession
 
-# Make a connection pool.
->>> http = HTTPSession()
+    # Make a connection pool.
+    >>> http = HTTPSession()
 
-# Make a request.
->>> r = http.request('get', 'https://httpbin.org/ip')
+    # Make a request.
+    >>> r = http.request('get', 'https://httpbin.org/ip')
 
-# View response data.
->>> r.json()
-{'ip': '172.69.48.124'}
-```
+    # View response data.
+    >>> r.json()
+    {'ip': '172.69.48.124'}
 
 Requests III allows you to send *organic, grass-fed* **HTTP/1.1** & **HTTP/2** (wip) requests,
 without the need for manual thought-labor. There's no need to add query
