@@ -23,13 +23,15 @@ Behold, the power of Requests III:
 
 # Make a request.
 >>> r = http.request('get', 'https://httpbin.org/ip')
+
+# View response data.
 >>> r.json()
 {'ip': '172.69.48.124'}
 ```
 
 [![image](https://raw.githubusercontent.com/requests/requests/master/docs/_static/requests-logo-small.png)](http://docs.python-requests.org/)
 
-Requests III allows you to send *organic, grass-fed* HTTP/1.1 & HTTP/2 requests,
+Requests III allows you to send *organic, grass-fed* **HTTP/1.1** & **HTTP/2** (wip) requests,
 without the need for manual thought-labor. There's no need to add query
 strings to your URLs, or to form-encode your POST data. Keep-alive and
 HTTP connection pooling are 100% automatic, as well.
@@ -42,6 +44,13 @@ Feature Support
 ---------------
 
 Requests III is ready for today's web.
+
+- Type-annotations for all public-facing APIs.
+- Better defaults; required timeouts.
+- ``async``/``await`` keyword & ``asyncio`` support.
+- Compability with Python 3.6+.
+
+While retaining all the features of `Requests Classic <https://2.python-requests.org/>`_:
 
 -   International Domains and URLs
 -   Keep-Alive & Connection Pooling
@@ -59,13 +68,10 @@ Requests III is ready for today's web.
 -   `.netrc` Support
 -   Chunked Requests
 
-Requests officially supports Python 2.7 & 3.4–3.7, and runs great on
-PyPy.
-
 Installation
 ------------
 
-To install Requests, simply use [pipenv](http://pipenv.org/) (or pip, of
+To install Requests III, simply use [pipenv](http://pipenv.org/) (or pip, of
 course):
 
 ``` {.sourceCode .bash}
