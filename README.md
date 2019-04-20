@@ -10,7 +10,7 @@ Requests: HTTP for Humans™
 
 **If you're interested in financially supporting Requests 3 development, please [make a donation](https://cash.me/$KennethReitz). Your support helps tremendously with sustainability of motivation.**
 
-**Requests III** is an HTTP library for Python, built for Humans and Machines, alike. **This repository is a work in progress, and the expected release timeline is "before PyCon 2020".
+**Requests III** is an HTTP library for Python, built for Humans and Machines, alike. **This repository is a work in progress, and the expected release timeline is "before PyCon 2020"**.
 
 ![image](https://farm5.staticflickr.com/4317/35198386374_1939af3de6_k_d.jpg)
 
