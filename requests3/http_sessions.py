@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-requests.session
-~~~~~~~~~~~~~~~~
+requests.http_session
+~~~~~~~~~~~~~~~~~~~~~
 
 This module provides a Session object to manage and persist settings across
 requests (cookies, auth, proxies).
@@ -14,17 +14,17 @@ from datetime import timedelta
 
 from .core._http._backends.trio_backend import TrioBackend
 
-from .auth import _basic_auth_str
-from .basics import cookielib, urljoin, urlparse, str
-from .cookies import (
+from .http_auth import _basic_auth_str
+from ._basics import cookielib, urljoin, urlparse, str
+from .http_cookies import (
     cookiejar_from_dict,
     extract_cookies_to_jar,
     RequestsCookieJar,
     merge_cookies,
     _copy_cookie_jar,
 )
-from .models import Request, PreparedRequest, DEFAULT_REDIRECT_LIMIT
-from .hooks import default_hooks, dispatch_hook
+from .http_models import Request, PreparedRequest, DEFAULT_REDIRECT_LIMIT
+from ._hooks import default_hooks, dispatch_hook
 from ._internal_utils import to_native_string
 from .utils import to_key_val_list, default_headers, DEFAULT_PORTS
 from .exceptions import (
@@ -36,8 +36,8 @@ from .exceptions import (
     InvalidHeader,
 )
 
-from .structures import CaseInsensitiveDict
-from .adapters import HTTPAdapter, AsyncHTTPAdapter
+from ._structures import CaseInsensitiveDict
+from .http_adapters import HTTPAdapter, AsyncHTTPAdapter
 
 from .utils import (
     requote_uri,
@@ -49,10 +49,10 @@ from .utils import (
     rewind_body,
 )
 
-from .status_codes import codes
+from .http_stati import codes
 
 # formerly defined here, reexposed here for backward compatibility
-from .models import REDIRECT_STATI
+from .http_models import REDIRECT_STATI
 
 # Preferred clock, based on which one is more accurate on a given system.
 if sys.platform == "win32":

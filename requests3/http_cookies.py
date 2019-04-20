@@ -14,7 +14,7 @@ import calendar
 from collections.abc import MutableMapping
 
 from ._internal_utils import to_native_string
-from .basics import cookielib, urlparse, urlunparse, Morsel
+from ._basics import cookielib, urlparse, urlunparse, Morsel
 
 try:
     import threading

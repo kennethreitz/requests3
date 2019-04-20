@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from .structures import LookupDict
+from ._structures import LookupDict
 
 _codes = {
     # Informational.

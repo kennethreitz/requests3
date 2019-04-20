@@ -24,12 +24,12 @@ from .core._http.exceptions import (
 )
 
 from io import UnsupportedOperation
-from .hooks import default_hooks
-from .structures import CaseInsensitiveDict
+from ._hooks import default_hooks
+from ._structures import CaseInsensitiveDict
 
 import requests3 as requests
-from .auth import HTTPBasicAuth
-from .cookies import cookiejar_from_dict, get_cookie_header, _copy_cookie_jar
+from .http_auth import HTTPBasicAuth
+from .http_cookies import cookiejar_from_dict, get_cookie_header, _copy_cookie_jar
 from .exceptions import (
     HTTPError,
     MissingScheme,
@@ -56,7 +56,7 @@ from .utils import (
     check_header_validity,
     is_stream,
 )
-from .basics import (
+from ._basics import (
     cookielib,
     urlunparse,
     urlsplit,
@@ -68,7 +68,7 @@ from .basics import (
     basestring,
 )
 import json as complexjson
-from .status_codes import codes
+from .http_stati import codes
 
 # : The set of HTTP status codes that indicate an automatically
 #: processable redirect.

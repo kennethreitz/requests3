@@ -14,8 +14,8 @@ import threading
 
 from base64 import b64encode
 
-from .basics import urlparse, str, basestring
-from .cookies import extract_cookies_to_jar
+from ._basics import urlparse, str, basestring
+from .http_cookies import extract_cookies_to_jar
 from ._internal_utils import to_native_string
 from .utils import parse_dict_header
 

@@ -7,7 +7,7 @@ Provides utility functions that are consumed internally by Requests
 which depend on extremely few external helpers (such as compat)
 """
 
-from .basics import builtin_str, str
+from ._basics import builtin_str, str
 
 
 def to_native_string(string, encoding='ascii'):

@@ -14,10 +14,10 @@ from typing import (
     Dict,
 )
 
-from .import auth
-from .models import Response, PreparedRequest
-from .cookies import RequestsCookieJar
-from .sessions import Session
+from .import http_auth as auth
+from .http_models import Response, PreparedRequest
+from .http_cookies import RequestsCookieJar
+from .http_sessions import Session
 
 _ParamsMappingValueType = Union[
     str, bytes, int, float, Iterable[Union[str, bytes, int, float]]

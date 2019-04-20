@@ -28,8 +28,8 @@ from .core._http.exceptions import ReadTimeoutError
 from .core._http.exceptions import SSLError as _SSLError
 from .core._http.exceptions import ResponseError
 
-from .models import Response, AsyncResponse
-from .basics import urlparse, basestring
+from .http_models import Response, AsyncResponse
+from ._basics import urlparse, basestring
 from .utils import (
     DEFAULT_CA_BUNDLE_PATH,
     get_encoding_from_headers,
@@ -38,8 +38,8 @@ from .utils import (
     urldefragauth,
     select_proxy,
 )
-from .structures import HTTPHeaderDict
-from .cookies import extract_cookies_to_jar
+from ._structures import HTTPHeaderDict
+from .http_cookies import extract_cookies_to_jar
 from .exceptions import (
     ConnectionError,
     ConnectTimeout,
@@ -49,7 +49,7 @@ from .exceptions import (
     RetryError,
     InvalidScheme,
 )
-from .auth import _basic_auth_str
+from .http_auth import _basic_auth_str
 
 try:
     from .core._http.contrib.socks import SOCKSProxyManager

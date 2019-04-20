@@ -23,11 +23,12 @@ import platform
 import zipfile
 from typing import Mapping
 
-from .__version__ import __version__
-from . import certs
+import certifi
 
-from .basics import parse_http_list as _parse_list_header
-from .basics import (
+from .__version__ import __version__
+
+from ._basics import parse_http_list as _parse_list_header
+from ._basics import (
     quote,
     urlparse,
     bytes,
@@ -41,9 +42,9 @@ from .basics import (
     proxy_bypass_environment,
     getproxies_environment
 )
-from .cookies import cookiejar_from_dict
-from .structures import HTTPHeaderDict
-from .cookies import RequestsCookieJar
+from .http_cookies import cookiejar_from_dict, RequestsCookieJar
+from ._structures import HTTPHeaderDict
+
 from .exceptions import (
     InvalidURL,
     InvalidHeader,
@@ -52,7 +53,7 @@ from .exceptions import (
 )
 
 NETRC_FILES = (".netrc", "_netrc")
-DEFAULT_CA_BUNDLE_PATH = certs.where()
+DEFAULT_CA_BUNDLE_PATH = certifi.where()
 DEFAULT_PORTS = (80, 443)
 if platform.system() == "Windows":
 
