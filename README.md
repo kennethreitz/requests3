@@ -7,7 +7,7 @@ Requests III: HTTP for Humans and Machines, alike.
 [![image](https://img.shields.io/github/contributors/kennethreitz/requests3.svg)](https://github.com/requests/requests/graphs/contributors)
 [![image](https://img.shields.io/badge/Say%20Thanks-!-1EAEDB.svg)](https://saythanks.io/to/kennethreitz)
 
-**If you're interested in financially supporting Requests 3 development, please [make a donation](https://cash.me/$KennethReitz). Your support helps tremendously with sustainability of motivation.**
+**If you're interested in financially supporting Requests 3 development, please [make a donation](https://cash.me/$KennethReitz).**
 
 **Requests III** is an HTTP library for Python, built for Humans and Machines, alike. **This repository is a work in progress, and the expected release timeline is "before PyCon 2020"**.
 
@@ -45,12 +45,13 @@ Feature Support
 
 Requests III is ready for today's web.
 
+- Support for H11 & H2 protocols.
 - Type-annotations for all public-facing APIs.
 - Better defaults; required timeouts.
 - ``async``/``await`` keyword & ``asyncio`` support.
 - Compability with Python 3.6+.
 
-While retaining all the features of `Requests Classic <https://2.python-requests.org/>`_:
+While retaining all the features of [Requests Classic](https://2.python-requests.org/):
 
 -   International Domains and URLs
 -   Keep-Alive & Connection Pooling
