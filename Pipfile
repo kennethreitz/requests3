@@ -3,7 +3,7 @@ url = "https://pypi.org/simple/"
 verify_ssl = true
 name = "pypi"
 
-[dev-packages]
+[packages]
 codecov = "*"
 pytest-httpbin = ">=0.0.7"
 pytest-mock = "*"

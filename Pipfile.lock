@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "d16571af6a7c4058f9b33f1af783cc5f0a87de0a4c0badb2b925a19ab8996c69"
+            "sha256": "4a7ac91f13df9207ddbbc6d09fd1f19b7cb87892ac3e029a2f84fc26727656b6"
         },
         "pipfile-spec": 6,
         "requires": {},
@@ -13,8 +13,7 @@
             }
         ]
     },
-    "default": {},
-    "develop": {
+    "default": {
         "alabaster": {
             "hashes": [
                 "sha256:446438bdcca0e05bd45ea2de1668c1d9b032e1a9154c2c259092d77031ddd359",
@@ -642,20 +641,13 @@
             ],
             "path": "."
         },
-        "requests-toolbelt": {
-            "hashes": [
-                "sha256:380606e1d10dc85c3bd47bf5a6095f815ec007be7a8b69c878507068df059e6f",
-                "sha256:968089d4584ad4ad7c171454f0a5c6dac23971e9472521ea3b6d49d610aa6fc0"
-            ],
-            "version": "==0.9.1"
-        },
         "rfc3986": {
             "hashes": [
-                "sha256:5ad82677b02b88c8d24f6511b4ee9baa5e7da675599b479fbbc5c9c578b5b737",
-                "sha256:bc3ae4b7cd88a99eff2d3900fcb858d44562fd7f273fc07aeef568b9bb6fc4e1"
+                "sha256:5ec984c915ce01ec6c4ebe37ade6a3a8cee6856bfd4facf459799b52142ef978",
+                "sha256:a9945150c91f3680797eb36c451c7c26d034125b4b320d4f02962bad6fcf52a7"
             ],
             "index": "pypi",
-            "version": "==1.2.0"
+            "version": "==1.3.0"
         },
         "service-identity": {
             "hashes": [
@@ -807,5 +799,6 @@
             ],
             "version": "==4.6.0"
         }
-    }
+    },
+    "develop": {}
 }
