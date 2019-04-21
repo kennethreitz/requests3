@@ -4,7 +4,7 @@ version: 2.1
 jobs:
   build:
     docker:
-      - image: kennethreitz/pipenv
+      - image: circleci/python:3.6.2-stretch-browsers
     steps:
       - checkout
       - setup_remote_docker
