@@ -7,10 +7,10 @@ import zipfile
 from collections import deque
 
 import pytest
-from requests3 import basics
-from requests3.cookies import RequestsCookieJar
-from requests3.structures import CaseInsensitiveDict
-from requests3.utils import (
+from requests3 import _basics as basics
+from requests3.http_cookies import RequestsCookieJar
+from requests3._structures import CaseInsensitiveDict
+from requests3.http_utils import (
     address_in_network,
     dotted_netmask,
     get_auth_from_url,

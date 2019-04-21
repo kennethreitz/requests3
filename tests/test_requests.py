@@ -12,15 +12,15 @@ import warnings
 import re
 
 import io
-import requests
+import requests3
 import pytest
 import pytest_httpbin
-from requests3._adapters import HTTPAdapter
+from requests3.http_adapters import HTTPAdapter
 from requests3.http_auth import HTTPDigestAuth, _basic_auth_str
 from requests3._basics import (
     Morsel, cookielib, getproxies, str, urlparse, builtin_str
 )
-from requests3.http_cookies import ( cookiejar_from_dict, morsel_to_cookie)
+from requests3.http_cookies import (cookiejar_from_dict, morsel_to_cookie)
 from requests3.exceptions import (
     ConnectionError,
     ConnectTimeout,
@@ -38,14 +38,14 @@ from requests3.exceptions import (
     SSLError,
 )
 from requests3.http_models import PreparedRequest
-from requests3.http_structures import CaseInsensitiveDict
+from requests3._structures import CaseInsensitiveDict
 from requests3.http_sessions import SessionRedirectMixin
 from requests3.http_models import urlencode
 from requests3._hooks import default_hooks
 from requests3.http_utils import DEFAULT_CA_BUNDLE_PATH
 
 from .compat import StringIO, u
-from .http_utils import override_environ
+from .utils import override_environ
 from urllib3.util import Timeout as Urllib3Timeout
 
 
@@ -75,7 +75,7 @@ try:
 except ImportError:
     HAS_MODERN_SSL = False
 try:
-    requests.pyopenssl
+    requests3.pyopenssl
     HAS_PYOPENSSL = True
 except AttributeError:
     HAS_PYOPENSSL = False
@@ -509,7 +509,7 @@ class TestRequests:
         cj = cookiejar_from_dict({'foo': 'bar'}, cookielib.CookieJar())
         s.cookies = cookiejar_from_dict({'cookie': 'tasty'})
         # Prepare request without using Session
-        req = requests.Request('GET', httpbin('headers'), cookies=cj)
+        req = requests3.Request('GET', httpbin('headers'), cookies=cj)
         prep_req = req.prepare()
         # Send request and simulate redirect
         resp = s.send(prep_req)
@@ -521,7 +521,7 @@ class TestRequests:
         assert isinstance(prep_req._cookies, cookielib.CookieJar)
         assert isinstance(resp.request._cookies, cookielib.CookieJar)
         assert not isinstance(
-            resp.request._cookies, requests.cookies.RequestsCookieJar
+            resp.request._cookies, requests3.cookies.RequestsCookieJar
         )
         cookies = {}
         for c in resp.request._cookies:
@@ -530,7 +530,7 @@ class TestRequests:
         assert cookies['cookie'] == 'tasty'
 
     @pytest.mark.parametrize(
-        'jar', (requests.cookies.RequestsCookieJar(), cookielib.CookieJar())
+        'jar', (requests3.http_cookies.RequestsCookieJar(), cookielib.CookieJar())
     )
     def test_custom_cookie_policy_persistence(self, s, httpbin, jar):
         """Verify a custom CookiePolicy is propagated on each session request."""

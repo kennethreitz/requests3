@@ -25,3 +25,11 @@ white = {version = "*"}
 "rfc3986" = "*"
 twisted = {extras = ["tls"]}
 httpcore = {git = "https://github.com/encode/httpcore.git"}
+trio = "*"
+
+[dev-packages]
+requests = {path = ".",editable = true,extras = ["test,socks"]}
+black = "*"
+
+[pipenv]
+allow_prereleases = true
