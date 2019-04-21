@@ -10,7 +10,7 @@ import idna
 import urllib3
 import chardet
 
-from . import types
+from . import _types as types
 
 from . import __version__ as requests_version
 

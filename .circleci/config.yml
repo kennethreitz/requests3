@@ -7,6 +7,8 @@ jobs:
       - image: circleci/python:3.6.2-stretch-browsers
     steps:
       - checkout
-      - run: pip install --upgrade pipenv
-      - run: pipenv install --sytem
-      - run: python setup.py test
+      - setup_remote_docker
+
+      # Run the tests:
+      - run: docker-compose build
+      - run: docker-compose up
