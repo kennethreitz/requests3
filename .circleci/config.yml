@@ -11,4 +11,4 @@ jobs:
 
       # Run the tests:
       - run: docker-compose build
-      - run: docker-compose up -i
+      - run: docker-compose up --exit-code-from tests
