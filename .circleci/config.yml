@@ -11,4 +11,4 @@ jobs:
 
       # Run the tests:
       - run: docker-compose build
-      - run: docker-compose up
+      - run: docker-compose up -i
