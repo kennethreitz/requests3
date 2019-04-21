@@ -35,6 +35,7 @@ from requests3.http_utils import (
     urldefragauth,
     add_dict_to_cookiejar,
     set_environ,
+    extract_zipped_paths
 )
 from requests3._internal_utils import unicode_is_ascii
 

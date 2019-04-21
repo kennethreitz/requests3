@@ -657,12 +657,12 @@ def should_bypass_proxies(url: str, no_proxy: typing.Optional[str]) -> bool:
     no_proxy_arg = no_proxy
     if no_proxy is None:
         no_proxy = get_proxy("no_proxy")
-    netloc = urlparse(url).netloc
+    parsed = urlparse(url)
     if no_proxy:
         # We need to check whether we match here. We need to see if we match
         # the end of the hostname, both with and without the port.
         no_proxy = (host for host in no_proxy.replace(" ", "").split(",") if host)
-        ip = netloc.split(":")[0]
+        ip = parsed.netloc.split(":")[0]
         if is_ipv4_address(ip):
             for proxy_ip in no_proxy:
                 if is_valid_cidr(proxy_ip):
@@ -680,13 +680,13 @@ def should_bypass_proxies(url: str, no_proxy: typing.Optional[str]) -> bool:
                 host_with_port += ":{}".format(parsed.port)
 
             for host in no_proxy:
-                if netloc.endswith(host) or netloc.split(":")[0].endswith(host):
+                if parsed.netloc.endswith(host) or parsed.netloc.split(":")[0].endswith(host):
                     # The URL does match something in no_proxy, so we don't want
                     # to apply the proxies on this URL.
                     return True
 
     with set_environ("no_proxy", no_proxy_arg):
-        return bool(proxy_bypass(netloc))
+        return bool(proxy_bypass(parsed.netloc))
 
 
 def get_environ_proxies(url: str, no_proxy: typing.Optional[bool] = None) -> dict:
