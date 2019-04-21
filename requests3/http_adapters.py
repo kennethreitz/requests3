@@ -30,7 +30,7 @@ from .core._http.exceptions import ResponseError
 
 from .http_models import Response, AsyncResponse
 from ._basics import urlparse, basestring
-from .utils import (
+from .http_utils import (
     DEFAULT_CA_BUNDLE_PATH,
     get_encoding_from_headers,
     prepend_scheme_if_needed,

@@ -26,7 +26,7 @@ from .http_cookies import (
 from .http_models import Request, PreparedRequest, DEFAULT_REDIRECT_LIMIT
 from ._hooks import default_hooks, dispatch_hook
 from ._internal_utils import to_native_string
-from .utils import to_key_val_list, default_headers, DEFAULT_PORTS
+from .http_utils import to_key_val_list, default_headers, DEFAULT_PORTS
 from .exceptions import (
     TooManyRedirects,
     InvalidScheme,
@@ -39,7 +39,7 @@ from .exceptions import (
 from ._structures import CaseInsensitiveDict
 from .http_adapters import HTTPAdapter, AsyncHTTPAdapter
 
-from .utils import (
+from .http_utils import (
     requote_uri,
     get_environ_proxies,
     get_netrc_auth,
@@ -324,7 +324,7 @@ class SessionRedirectMixin(object):
         return method != original_method
 
 
-class Session(SessionRedirectMixin):
+class HTTPSession(SessionRedirectMixin):
     """A Requests session.
 
     Provides cookie persistence, connection-pooling, and configuration.
@@ -731,7 +731,7 @@ class Session(SessionRedirectMixin):
             setattr(self, attr, value)
 
 
-class AsyncSession(Session):
+class AsyncSession(HTTPSession):
     """docstring for AsyncSession"""
 
     def __init__(self, backend=None):

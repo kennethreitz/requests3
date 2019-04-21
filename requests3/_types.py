@@ -17,7 +17,7 @@ from typing import (
 from . import http_auth as auth
 from .http_models import Response, PreparedRequest
 from .http_cookies import RequestsCookieJar
-from .http_sessions import Session
+from .http_sessions import HTTPSession
 
 _ParamsMappingValueType = Union[
     str, bytes, int, float, Iterable[Union[str, bytes, int, float]]
@@ -65,3 +65,4 @@ Host = str
 Sequence = List
 Filename = str
 KeyValueList = List[Tuple[Text, Text]]
+Session = HTTPSession

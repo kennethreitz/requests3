@@ -46,7 +46,7 @@ from .exceptions import (
     ReadTimeout,
 )
 from ._internal_utils import to_native_string, unicode_is_ascii
-from .utils import (
+from .http_utils import (
     guess_filename,
     get_auth_from_url,
     requote_uri,

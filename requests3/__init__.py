@@ -113,9 +113,9 @@ from .__version__ import __title__, __description__, __url__, __version__
 from .__version__ import __build__, __author__, __author_email__, __license__
 from .__version__ import __copyright__, __cake__
 
-from . import utils
+from . import http_utils
 from .http_models import Request, Response, PreparedRequest
-from .http_sessions import Session, AsyncSession
+from .http_sessions import HTTPSession, AsyncSession
 from .http_stati import codes
 from .exceptions import (
     RequestException,
