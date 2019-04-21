@@ -115,7 +115,7 @@ from .__version__ import __copyright__, __cake__
 
 from . import http_utils
 from .http_models import Request, Response, PreparedRequest
-from .http_sessions import HTTPSession, AsyncSession
+from .http_sessions import HTTPSession, AsyncHTTPSession
 from .http_stati import codes
 from .exceptions import (
     RequestException,

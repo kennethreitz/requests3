@@ -333,13 +333,13 @@ class HTTPSession(SessionRedirectMixin):
 
       >>> import requests
       >>> s = requests.Session()
-      >>> s.get('https://httpbin.org/get')
+      >>> s.request('get', 'https://httpbin.org/get')
       <Response [200]>
 
     Or as a context manager::
 
       >>> with requests.Session() as s:
-      >>>     s.get('https://httpbin.org/get')
+      >>>     s.request('get', 'https://httpbin.org/get')
       <Response [200]>
     """
 
@@ -358,8 +358,6 @@ class HTTPSession(SessionRedirectMixin):
         "trust_env",
         "max_redirects",
     ]
-
-    __slots__
 
     def __init__(self):
         # : A case-insensitive dictionary of headers to be sent on each
@@ -537,16 +535,6 @@ class HTTPSession(SessionRedirectMixin):
         kwargs.setdefault("allow_redirects", True)
         return self.request("GET", url, **kwargs)
 
-    def options(self, url, **kwargs):
-        r"""Sends a OPTIONS request. Returns :class:`Response` object.
-
-        :param url: URL for the new :class:`Request` object.
-        :param \*\*kwargs: Optional arguments that ``request`` takes.
-        :rtype: requests.Response
-        """
-        kwargs.setdefault("allow_redirects", True)
-        return self.request("OPTIONS", url, **kwargs)
-
     def head(self, url, **kwargs):
         r"""Sends a HEAD request. Returns :class:`Response` object.
 
@@ -556,49 +544,6 @@ class HTTPSession(SessionRedirectMixin):
         """
         kwargs.setdefault("allow_redirects", False)
         return self.request("HEAD", url, **kwargs)
-
-    def post(self, url, data=None, json=None, **kwargs):
-        r"""Sends a POST request. Returns :class:`Response` object.
-
-        :param url: URL for the new :class:`Request` object.
-        :param data: (optional) Dictionary, list of tuples, bytes, or file-like
-            object to send in the body of the :class:`Request`.
-        :param json: (optional) json to send in the body of the :class:`Request`.
-        :param \*\*kwargs: Optional arguments that ``request`` takes.
-        :rtype: requests.Response
-        """
-        return self.request("POST", url, data=data, json=json, **kwargs)
-
-    def put(self, url, data=None, **kwargs):
-        r"""Sends a PUT request. Returns :class:`Response` object.
-
-        :param url: URL for the new :class:`Request` object.
-        :param data: (optional) Dictionary, list of tuples, bytes, or file-like
-            object to send in the body of the :class:`Request`.
-        :param \*\*kwargs: Optional arguments that ``request`` takes.
-        :rtype: requests.Response
-        """
-        return self.request("PUT", url, data=data, **kwargs)
-
-    def patch(self, url, data=None, **kwargs):
-        r"""Sends a PATCH request. Returns :class:`Response` object.
-
-        :param url: URL for the new :class:`Request` object.
-        :param data: (optional) Dictionary, list of tuples, bytes, or file-like
-            object to send in the body of the :class:`Request`.
-        :param \*\*kwargs: Optional arguments that ``request`` takes.
-        :rtype: requests.Response
-        """
-        return self.request("PATCH", url, data=data, **kwargs)
-
-    def delete(self, url, **kwargs):
-        r"""Sends a DELETE request. Returns :class:`Response` object.
-
-        :param url: URL for the new :class:`Request` object.
-        :param \*\*kwargs: Optional arguments that ``request`` takes.
-        :rtype: requests.Response
-        """
-        return self.request("DELETE", url, **kwargs)
 
     def send(self, request, **kwargs):
         """Send a given PreparedRequest.
@@ -731,12 +676,14 @@ class HTTPSession(SessionRedirectMixin):
             setattr(self, attr, value)
 
 
-class AsyncSession(HTTPSession):
-    """docstring for AsyncSession"""
+class AsyncHTTPSession(HTTPSession):
 
     def __init__(self, backend=None):
+        # Default to Trio backend (temporary).
         self.backend = backend or TrioBackend()
-        super(AsyncSession, self).__init__()
+
+        super(AsyncHTTPSession, self).__init__()
+
         self.mount("https://", AsyncHTTPAdapter(backend=self.backend))
         self.mount("http://", AsyncHTTPAdapter(backend=self.backend))
 
@@ -748,17 +695,7 @@ class AsyncSession(HTTPSession):
         :rtype: requests.Response
         """
         kwargs.setdefault("allow_redirects", True)
-        return await self.request("GET", url, **kwargs)
-
-    async def options(self, url, **kwargs):
-        r"""Sends a OPTIONS request. Returns :class:`Response` object.
-
-        :param url: URL for the new :class:`Request` object.
-        :param \*\*kwargs: Optional arguments that ``request`` takes.
-        :rtype: requests.Response
-        """
-        kwargs.setdefault("allow_redirects", True)
-        return await self.request("OPTIONS", url, **kwargs)
+        return await self.request("get", url, **kwargs)
 
     async def head(self, url, **kwargs):
         r"""Sends a HEAD request. Returns :class:`Response` object.
@@ -769,46 +706,6 @@ class AsyncSession(HTTPSession):
         """
         kwargs.setdefault("allow_redirects", False)
         return await self.request("HEAD", url, **kwargs)
-
-    async def post(self, url, data=None, json=None, **kwargs):
-        r"""Sends a POST request. Returns :class:`Response` object.
-
-        :param url: URL for the new :class:`Request` object.
-        :param data: (optional) Dictionary, bytes, or file-like object to send in the body of the :class:`Request`.
-        :param json: (optional) json to send in the body of the :class:`Request`.
-        :param \*\*kwargs: Optional arguments that ``request`` takes.
-        :rtype: requests.Response
-        """
-        return await self.request("POST", url, data=data, json=json, **kwargs)
-
-    async def put(self, url, data=None, **kwargs):
-        r"""Sends a PUT request. Returns :class:`Response` object.
-
-        :param url: URL for the new :class:`Request` object.
-        :param data: (optional) Dictionary, bytes, or file-like object to send in the body of the :class:`Request`.
-        :param \*\*kwargs: Optional arguments that ``request`` takes.
-        :rtype: requests.Response
-        """
-        return await self.request("PUT", url, data=data, **kwargs)
-
-    async def patch(self, url, data=None, **kwargs):
-        r"""Sends a PATCH request. Returns :class:`Response` object.
-
-        :param url: URL for the new :class:`Request` object.
-        :param data: (optional) Dictionary, bytes, or file-like object to send in the body of the :class:`Request`.
-        :param \*\*kwargs: Optional arguments that ``request`` takes.
-        :rtype: requests.Response
-        """
-        return await self.request("PATCH", url, data=data, **kwargs)
-
-    async def delete(self, url, **kwargs):
-        r"""Sends a DELETE request. Returns :class:`Response` object.
-
-        :param url: URL for the new :class:`Request` object.
-        :param \*\*kwargs: Optional arguments that ``request`` takes.
-        :rtype: requests.Response
-        """
-        return await self.request("DELETE", url, **kwargs)
 
     async def request(
         self,
