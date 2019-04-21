@@ -65,4 +65,3 @@ Host = str
 Sequence = List
 Filename = str
 KeyValueList = List[Tuple[Text, Text]]
-Session = HTTPSession

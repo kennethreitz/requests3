@@ -37,7 +37,8 @@ class PyTest(Command):
     def run(self):
         import pytest
 
-        errno = pytest.main(["-n", "auto"])
+        # errno = pytest.main(["-n", "auto"])
+        errno = pytest.main([])
         sys.exit(errno)
 
 

@@ -154,7 +154,7 @@ from . import _types as types
 
 
 def request(
-    method: types.Method, url: types.URL, *, session: types.Session = None, **kwargs
+    method: types.Method, url: types.URL, *, session: types.HTTPSession = None, **kwargs
 ) -> types.Response:
     """Constructs and sends a :class:`Request <Request>`.
 
@@ -196,7 +196,7 @@ def request(
     # By using the 'with' statement we are sure the session is closed, thus we
     # avoid leaving sockets open which can trigger a ResourceWarning in some
     # cases, and look like a memory leak in others.
-    session = sessions.Session() if session is None else session
+    session = sessions.HTTPSession() if session is None else session
     with session:
         return session.request(method=method, url=url, **kwargs)
 

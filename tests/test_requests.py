@@ -15,12 +15,12 @@ import io
 import requests
 import pytest
 import pytest_httpbin
-from requests3.adapters import HTTPAdapter
-from requests3.auth import HTTPDigestAuth, _basic_auth_str
-from requests3.basics import (
+from requests3._adapters import HTTPAdapter
+from requests3.http_auth import HTTPDigestAuth, _basic_auth_str
+from requests3._basics import (
     Morsel, cookielib, getproxies, str, urlparse, builtin_str
 )
-from requests3.cookies import ( cookiejar_from_dict, morsel_to_cookie)
+from requests3.http_cookies import ( cookiejar_from_dict, morsel_to_cookie)
 from requests3.exceptions import (
     ConnectionError,
     ConnectTimeout,
@@ -37,15 +37,15 @@ from requests3.exceptions import (
     InvalidBodyError,
     SSLError,
 )
-from requests3.models import PreparedRequest
-from requests3.structures import CaseInsensitiveDict
-from requests3.sessions import SessionRedirectMixin
-from requests3.models import urlencode
-from requests3.hooks import default_hooks
-from requests3.utils import DEFAULT_CA_BUNDLE_PATH
+from requests3.http_models import PreparedRequest
+from requests3.http_structures import CaseInsensitiveDict
+from requests3.http_sessions import SessionRedirectMixin
+from requests3.http_models import urlencode
+from requests3._hooks import default_hooks
+from requests3.http_utils import DEFAULT_CA_BUNDLE_PATH
 
 from .compat import StringIO, u
-from .utils import override_environ
+from .http_utils import override_environ
 from urllib3.util import Timeout as Urllib3Timeout
 
 
