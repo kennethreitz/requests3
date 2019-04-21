@@ -8,6 +8,5 @@ jobs:
     steps:
       - checkout
       - run: pip install --upgrade pipenv
-      - run: pipenv install --sytem --dev
-      - tests
+      - run: pipenv install --sytem
       - run: python setup.py test

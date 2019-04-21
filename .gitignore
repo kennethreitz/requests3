@@ -29,3 +29,5 @@ dist
 
 /.tox/
 /.eggs/
+/.idea/
+/.venv/

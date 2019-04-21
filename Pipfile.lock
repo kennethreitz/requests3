@@ -156,7 +156,6 @@
                 "sha256:e1ff2748c84d97b065cc95429814cdba39bcbd77c9c85c89344b317dc0d9cbff",
                 "sha256:ed851c75d1e0e043cbf5ca9a8e1b13c4c90f3fbd863dacb01c0808e2b5204201"
             ],
-            "markers": "os_name == 'nt'",
             "version": "==1.12.3"
         },
         "chardet": {
@@ -180,14 +179,6 @@
             ],
             "index": "pypi",
             "version": "==2.0.15"
-        },
-        "colorama": {
-            "hashes": [
-                "sha256:05eed71e2e327246ad6b38c540c4a3117230b19679b875190486ddd2d721422d",
-                "sha256:f8ac84de7840f5b9c4e3347b3c1eaa50f7e49c2b07596221daec5edaabbd7c48"
-            ],
-            "markers": "sys_platform == 'win32'",
-            "version": "==0.4.1"
         },
         "constantly": {
             "hashes": [
@@ -528,6 +519,7 @@
         },
         "pycparser": {
             "hashes": [
+                "sha256:106a4a789b7a3a04e74e15575c1a0922bd2dfc5d9261b0a7c95fa827a38705d2",
                 "sha256:a988718abfad80b6b157acce7bf130a30876d27603738ac39f140993246b25b3"
             ],
             "version": "==2.19"
