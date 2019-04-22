@@ -10,5 +10,4 @@ jobs:
       - setup_remote_docker
 
       # Run the tests:
-      - run: docker-compose build
       - run: docker-compose up --exit-code-from tests

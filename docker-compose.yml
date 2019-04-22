@@ -3,3 +3,5 @@ version: '3'
 services:
   tests:
     build: .
+    volumes:
+      - ./requests3:/app/requests3
