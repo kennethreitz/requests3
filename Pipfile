@@ -4,6 +4,7 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
+requests = {path = ".",editable = true,extras = ["socks"]}
 codecov = "*"
 pytest-httpbin = ">=0.0.7"
 pytest-mock = "*"
@@ -19,7 +20,6 @@ tox = "*"
 detox = "*"
 httpbin = ">=0.7.0"
 pytest = "*"
-requests = {path = ".",editable = true,extras = ["socks"]}
 pytest-mypy = "*"
 white = {version = "*"}
 "rfc3986" = "*"
