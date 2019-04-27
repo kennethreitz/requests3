@@ -69,17 +69,6 @@ While retaining all the features of [Requests Classic](https://2.python-requests
 -   `.netrc` Support
 -   Chunked Requests
 
-Installation
-------------
-
-To install Requests III, simply use [pipenv](http://pipenv.org/) (or pip, of
-course):
-
-``` {.sourceCode .bash}
-$ pipenv install requests3
-✨🍰✨
-```
-
 Satisfaction guaranteed.
 
 Documentation
