@@ -8,7 +8,7 @@ Data structures that power Requests.
 
 import collections
 
-from ._basics import basestring, OrderedDict
+from ._basics import basestring
 
 
 class CaseInsensitiveDict(collections.MutableMapping):
@@ -38,7 +38,7 @@ class CaseInsensitiveDict(collections.MutableMapping):
     behavior is undefined.
     """
 
-    __slots__ = "_store"
+    __slots__ = ["_store"]
 
     def __init__(self, data=None, **kwargs):
         self._store = collections.OrderedDict()

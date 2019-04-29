@@ -6,17 +6,17 @@ requests.auth
 This module contains the authentication handlers for Requests.
 """
 
+import hashlib
 import os
 import re
-import time
-import hashlib
 import threading
-
+import time
+import warnings
 from base64 import b64encode
 
-from ._basics import urlparse, str, basestring
-from .http_cookies import extract_cookies_to_jar
+from ._basics import basestring, str, urlparse
 from ._internal_utils import to_native_string
+from .http_cookies import extract_cookies_to_jar
 from .http_utils import parse_dict_header
 
 CONTENT_TYPE_FORM_URLENCODED = "application/x-www-form-urlencoded"

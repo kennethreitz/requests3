@@ -449,9 +449,9 @@ class HTTPResponse(io.IOBase):
     def readinto(self, b):
         # This method is required for `io` module compatibility.
         temp = self.read(len(b))
-        if len(temp) == 0:
+
+        if not temp:
             return 0
 
-        else:
-            b[: len(temp)] = temp
-            return len(temp)
+        b[: len(temp)] = temp
+        return len(temp)

@@ -8,6 +8,7 @@ that are also useful for external consumption.
 """
 
 import codecs
+import collections
 import contextlib
 import io
 import os
@@ -15,7 +16,6 @@ import re
 import cgi
 import socket
 import struct
-import sys
 import tempfile
 import warnings
 import typing
