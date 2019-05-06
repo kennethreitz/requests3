@@ -22,8 +22,6 @@ Release v\ |version|. (:ref:`Installation <install>`)
 
 **Requests III** is an HTTP library for Python, built for Humans and Machines, alike. This repository is a work in progress, and the expected release timeline is "before PyCon 2020".
 
-.. note:: If you're interested in the sustainability of Requests III development, please have your organization `make a donation <https://cash.me/$KennethReitz>`_.
-
 If you're on the job market, consider taking `this programming quiz <https://triplebyte.com/a/b1i2FB8/requests-docs-home>`_. A substantial donation will be made to this project, if you find a job through this platform.
 
 -------------------
