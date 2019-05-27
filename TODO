@@ -1,0 +1,2 @@
+- Restore API (I removed some endpoints that I shouldn't have).
+- Retries for idenpotent requests.
