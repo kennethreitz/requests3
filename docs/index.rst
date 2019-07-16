@@ -45,7 +45,7 @@ HTTP connection pooling are 100% automatic, as well.
 
 Besides, all the cool kids are doing it. Requests is one of the most
 downloaded Python packages of all time, pulling in over ~1.6 million
-installations *per day*!
+installations *per day*! Join the party!
 
 User Testimonials
 -----------------
@@ -67,9 +67,6 @@ User Testimonials
 **Kenny Meyers**—
     *Python HTTP: When in doubt, or when not in doubt, use Requests. Beautiful,
     simple, Pythonic.*
-
-Requests is one of the most downloaded Python packages of all time, pulling in
-pulling in over ~1.6 million installations *per day*!. Join the party!
 
 If your organization uses Requests internally, consider `supporting the development of 3.0 <https://cash.me/$KennethReitz>`_.
 

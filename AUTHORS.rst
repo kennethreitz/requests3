@@ -194,3 +194,4 @@ Patches and Suggestions
 - Antti Kaihola (`@akaihola <https://github.com/akaihola>`_)
 - Hugo van Kemenade (`@hugovk <https://github.com/hugovk>`_)
 - Allan Crooks (`@the-allanc <https://github.com/the-allanc>`_)
+- Kasper Karlsson (`@kasperkarlsson <https://github.com/kasperkarlsson>`_)
