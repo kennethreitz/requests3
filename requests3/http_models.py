@@ -8,7 +8,6 @@ This module contains the primary objects that power Requests.
 
 import datetime
 import codecs
-import sys
 from typing import Mapping, Callable
 
 # Import encoding now, to avoid implicit import later.

@@ -238,16 +238,16 @@ class TwistedSocket:
         # the most that we ever generate. (If *we* were cancelled, then there
         # will be 2 CancelledErrors, and that's fine; in that case we want to
         # preserve 1 of them and then re-raise it.)
-        for i in range(len(failures)):
-            if isinstance(failures[i].value, CancelledError):
-                del failures[i]
+        for idx, failure in enumerate(failures):
+            if isinstance(failure.value, CancelledError):
+                del failures[idx]
                 break
 
         # Now whatever's left is what we need to re-raise
-        if len(failures) == 0:
+        if not failures:
             return
 
-        elif len(failures) == 1:
+        if len(failures) == 1:
             failures[0].raiseException()
         else:
             raise DoubleError(*failures)
