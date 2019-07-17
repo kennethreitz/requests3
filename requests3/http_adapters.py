@@ -11,22 +11,6 @@ import os.path
 import socket
 
 from . import core
-from .core._http._backends import TrioBackend
-from .core._http.poolmanager import PoolManager, proxy_from_url
-from .core._http._async.poolmanager import PoolManager as AsyncPoolManager
-from .core._http.response import HTTPResponse
-from .core._http.util import Timeout as TimeoutSauce
-from .core._http.util.retry import Retry
-from .core._http.exceptions import ClosedPoolError
-from .core._http.exceptions import ConnectTimeoutError
-from .core._http.exceptions import HTTPError as _HTTPError
-from .core._http.exceptions import MaxRetryError
-from .core._http.exceptions import NewConnectionError
-from .core._http.exceptions import ProxyError as _ProxyError
-from .core._http.exceptions import ProtocolError
-from .core._http.exceptions import ReadTimeoutError
-from .core._http.exceptions import SSLError as _SSLError
-from .core._http.exceptions import ResponseError
 
 from .http_models import Response, AsyncResponse
 from ._basics import urlparse, basestring
@@ -198,24 +182,9 @@ class HTTPAdapter(BaseAdapter):
         "_pool_block",
     ]
 
-    def __init__(
-        self,
-        pool_connections=DEFAULT_POOLSIZE,
-        pool_maxsize=DEFAULT_POOLSIZE,
-        max_retries=DEFAULT_RETRIES,
-        pool_block=DEFAULT_POOLBLOCK,
-    ):
-        if max_retries == DEFAULT_RETRIES:
-            self.max_retries = Retry(0, read=False)
-        else:
-            self.max_retries = Retry.from_int(max_retries)
-        self.config = {}
-        self.proxy_manager = {}
+    def __init__(self):
         super(HTTPAdapter, self).__init__()
-        self._pool_connections = pool_connections
-        self._pool_maxsize = pool_maxsize
-        self._pool_block = pool_block
-        self.init_poolmanager(pool_connections, pool_maxsize, block=pool_block)
+        self.client = core.http3.Client()
 
     def __getstate__(self):
         return {attr: getattr(self, attr, None) for attr in self.__attrs__}
@@ -231,69 +200,6 @@ class HTTPAdapter(BaseAdapter):
             self._pool_connections, self._pool_maxsize, block=self._pool_block
         )
 
-    def init_poolmanager(
-        self, connections, maxsize, block=DEFAULT_POOLBLOCK, **pool_kwargs
-    ):
-        """Initializes a urllib3 PoolManager.
-
-        This method should not be called from user code, and is only
-        exposed for use when subclassing the
-        :class:`HTTPAdapter <requests.adapters.HTTPAdapter>`.
-
-        :param connections: The number of urllib3 connection pools to cache.
-        :param maxsize: The maximum number of connections to save in the pool.
-        :param block: Block when no free connections are available.
-        :param pool_kwargs: Extra keyword arguments used to initialize the Pool Manager.
-        """
-        # save these values for pickling
-        self._pool_connections = connections
-        self._pool_maxsize = maxsize
-        self._pool_block = block
-        self.poolmanager = PoolManager(
-            num_pools=connections,
-            maxsize=maxsize,
-            block=block,
-            strict=True,
-            **pool_kwargs,
-        )
-
-    def proxy_manager_for(self, proxy, **proxy_kwargs):
-        """Return urllib3 ProxyManager for the given proxy.
-
-        This method should not be called from user code, and is only
-        exposed for use when subclassing the
-        :class:`HTTPAdapter <requests.adapters.HTTPAdapter>`.
-
-        :param proxy: The proxy to return a urllib3 ProxyManager for.
-        :param proxy_kwargs: Extra keyword arguments used to configure the Proxy Manager.
-        :returns: ProxyManager
-        :rtype: urllib3.ProxyManager
-        """
-        if proxy in self.proxy_manager:
-            manager = self.proxy_manager[proxy]
-        elif proxy.lower().startswith("socks"):
-            username, password = get_auth_from_url(proxy)
-            manager = self.proxy_manager[proxy] = SOCKSProxyManager(
-                proxy,
-                username=username,
-                password=password,
-                num_pools=self._pool_connections,
-                maxsize=self._pool_maxsize,
-                block=self._pool_block,
-                **proxy_kwargs,
-            )
-        else:
-            proxy_headers = self.proxy_headers(proxy)
-            manager = self.proxy_manager[proxy] = proxy_from_url(
-                proxy,
-                proxy_headers=proxy_headers,
-                num_pools=self._pool_connections,
-                maxsize=self._pool_maxsize,
-                block=self._pool_block,
-                **proxy_kwargs,
-            )
-        return manager
-
     def build_response(self, req, resp):
         """Builds a :class:`Response <requests.Response>` object from a urllib3
         response. This should not be called from user code, and is only exposed
@@ -306,13 +212,13 @@ class HTTPAdapter(BaseAdapter):
         """
         response = Response()
         # Fallback to None if there's no status_code, for whatever reason.
-        response.status_code = getattr(resp, "status", None)
+        response.status_code = getattr(resp, "status_code", None)
         # Make headers case-insensitive.
         response.headers = HTTPHeaderDict(getattr(resp, "headers", {}))
         # Set encoding.
         response.encoding = get_encoding_from_headers(response.headers)
         response.raw = resp
-        response.reason = response.raw.reason
+        response.reason = getattr(resp, "reason_phrase", None)
         if isinstance(req.url, bytes):
             response.url = req.url.decode("utf-8")
         else:
@@ -323,42 +229,6 @@ class HTTPAdapter(BaseAdapter):
         response.request = req
         response.connection = self
         return response
-
-    def get_connection(self, url, proxies=None, verify=None, cert=None):
-        """Returns a urllib3 connection for the given URL. This should not be
-        called from user code, and is only exposed for use when subclassing the
-        :class:`HTTPAdapter <requests.adapters.HTTPAdapter>`.
-
-        :param url: The URL to connect to.
-        :param proxies: (optional) A Requests-style dictionary of proxies used on this request.
-        :rtype: urllib3.ConnectionPool
-        """
-        pool_kwargs = _pool_kwargs(verify, cert)
-        proxy = select_proxy(url, proxies)
-        if proxy:
-            proxy = prepend_scheme_if_needed(proxy, "http")
-            proxy_manager = self.proxy_manager_for(proxy)
-            conn = proxy_manager.connection_from_url(
-                url, pool_kwargs=pool_kwargs
-            )
-        else:
-            # Only scheme should be lower case
-            parsed = urlparse(url)
-            url = parsed.geturl()
-            conn = self.poolmanager.connection_from_url(
-                url, pool_kwargs=pool_kwargs
-            )
-        return conn
-
-    def close(self):
-        """Disposes of any internal state.
-
-        Currently, this closes the PoolManager and any active ProxyManager,
-        which closes any pooled connections.
-        """
-        self.poolmanager.clear()
-        for proxy in self.proxy_manager.values():
-            proxy.clear()
 
     def request_url(self, request, proxies):
         """Obtain the url to use when making the final request.
@@ -374,17 +244,18 @@ class HTTPAdapter(BaseAdapter):
         :param proxies: A dictionary of schemes or schemes and hosts to proxy URLs.
         :rtype: str
         """
-        proxy = select_proxy(request.url, proxies)
-        scheme = urlparse(request.url).scheme
-        is_proxied_http_request = proxy and scheme != "https"
-        using_socks_proxy = False
-        if proxy:
-            proxy_scheme = urlparse(proxy).scheme.lower()
-            using_socks_proxy = proxy_scheme.startswith("socks")
-        url = request.path_url
-        if is_proxied_http_request and not using_socks_proxy:
-            url = urldefragauth(request.url)
-        return url
+        # proxy = select_proxy(request.url, proxies)
+        # scheme = urlparse(request.url).scheme
+        # is_proxied_http_request = proxy and scheme != "https"
+        # using_socks_proxy = False
+        # if proxy:
+        #     proxy_scheme = urlparse(proxy).scheme.lower()
+        #     using_socks_proxy = proxy_scheme.startswith("socks")
+        # url = request.path_url
+        # if is_proxied_http_request and not using_socks_proxy:
+        #     url = urldefragauth(request.url)
+        # return url
+        return request.url
 
     def add_headers(self, request, **kwargs):
         """Add any headers needed by the connection. As of v2.0 this does
@@ -445,7 +316,6 @@ class HTTPAdapter(BaseAdapter):
         :param proxies: (optional) The proxies dictionary to apply to the request.
         :rtype: requests.Response
         """
-        conn = self.get_connection(request.url, proxies, verify, cert)
         url = self.request_url(request, proxies)
         self.add_headers(request)
         chunked = not (
@@ -454,7 +324,6 @@ class HTTPAdapter(BaseAdapter):
         if isinstance(timeout, tuple):
             try:
                 connect, read = timeout
-                timeout = TimeoutSauce(connect=connect, read=read)
             except ValueError as e:
                 # this may raise a string formatting error.
                 err = (
@@ -463,18 +332,13 @@ class HTTPAdapter(BaseAdapter):
                     "both timeouts to the same value".format(timeout)
                 )
                 raise ValueError(err)
-
-        elif isinstance(timeout, TimeoutSauce):
-            pass
-        else:
-            timeout = TimeoutSauce(connect=timeout, read=timeout)
         try:
             if not chunked:
                 resp = core.blocking_request(
                     method=request.method,
                     url=url,
                     data=request.body,
-                    headers=request.headers,
+                    headers=[(k, request.headers[k]) for k in request.headers],
                     # redirect=False,
                     # assert_same_host=False,
                     # stream=False,
@@ -482,7 +346,7 @@ class HTTPAdapter(BaseAdapter):
                     # retries=self.max_retries,
                     timeout=timeout,
                     # enforce_content_length=True,
-                    client=conn,
+                    client=self.client,
                 )
             # Send the request.
             else:
@@ -528,40 +392,18 @@ class HTTPAdapter(BaseAdapter):
                     low_conn.close()
                     raise
 
-        except (ProtocolError, socket.error) as err:
+        except (core.http3.exceptions.ProtocolError, socket.error) as err:
             raise ConnectionError(err, request=request)
 
-        except MaxRetryError as e:
-            if isinstance(e.reason, ConnectTimeoutError):
-                # TODO: Remove this in 3.0.0: see #2811
-                if not isinstance(e.reason, NewConnectionError):
-                    raise ConnectTimeout(e, request=request)
-
-            if isinstance(e.reason, ResponseError):
-                raise RetryError(e, request=request)
-
-            if isinstance(e.reason, _ProxyError):
-                raise ProxyError(e, request=request)
-
-            if isinstance(e.reason, _SSLError):
-                # This branch is for urllib3 v1.22 and later.
-                raise SSLError(e, request=request)
-
+        except core.http3.exceptions.PoolTimeout as e:
             raise ConnectionError(e, request=request)
 
-        except ClosedPoolError as e:
-            raise ConnectionError(e, request=request)
+        except (core.http3.exceptions.HttpError,) as e:
 
-        except _ProxyError as e:
-            raise ProxyError(e)
-
-        except (_SSLError, _HTTPError) as e:
-            if isinstance(e, _SSLError):
-                # This branch is for urllib3 versions earlier than v1.22
-                raise SSLError(e, request=request)
-
-            elif isinstance(e, ReadTimeoutError):
-                raise ReadTimeout(e, request=request)
+            if isinstance(e, core.http3.exceptions.PoolTimeout.ReadTimeout):
+                raise core.http3.exceptions.PoolTimeout.ReadTimeout(
+                    e, request=request
+                )
 
             else:
                 raise
@@ -593,7 +435,7 @@ class AsyncHTTPAdapter(HTTPAdapter):
         # Set encoding.
         response.encoding = get_encoding_from_headers(response.headers)
         response.raw = resp
-        response.reason = response.raw.reason
+        # response.reason = response.raw.reason
         if isinstance(req.url, bytes):
             response.url = req.url.decode("utf-8")
         else:

@@ -31,7 +31,11 @@ from ._structures import CaseInsensitiveDict
 
 import requests3 as requests
 from .http_auth import HTTPBasicAuth
-from .http_cookies import cookiejar_from_dict, get_cookie_header, _copy_cookie_jar
+from .http_cookies import (
+    cookiejar_from_dict,
+    get_cookie_header,
+    _copy_cookie_jar,
+)
 from .exceptions import (
     HTTPError,
     MissingScheme,
@@ -210,7 +214,9 @@ class RequestHooksMixin(object):
         if isinstance(hook, Callable):
             self.hooks[event].append(hook)
         elif hasattr(hook, "__iter__"):
-            self.hooks[event].extend(h for h in hook if isinstance(h, Callable))
+            self.hooks[event].extend(
+                h for h in hook if isinstance(h, Callable)
+            )
 
     def deregister_hook(self, event, hook):
         """Deregister a previously registered hook.
@@ -450,9 +456,7 @@ class PreparedRequest(RequestEncodingMixin, RequestHooksMixin):
             raise InvalidURL(f"Invalid URL {url!r}: URL is imporoper.")
 
         if not uri.scheme:
-            error = (
-                "Invalid URL {0!r}: No scheme supplied. Perhaps you meant http://{0}?"
-            )
+            error = "Invalid URL {0!r}: No scheme supplied. Perhaps you meant http://{0}?"
             error = error.format(to_native_string(url, "utf8"))
             raise MissingScheme(error)
 
@@ -587,7 +591,10 @@ class PreparedRequest(RequestEncodingMixin, RequestHooksMixin):
             # Set Content-Length to 0 for methods that can have a body
             # but don't provide one. (i.e. not GET or HEAD)
             self.headers["Content-Length"] = "0"
-        if "Transfer-Encoding" in self.headers and "Content-Length" in self.headers:
+        if (
+            "Transfer-Encoding" in self.headers
+            and "Content-Length" in self.headers
+        ):
             raise InvalidHeader(
                 "Conflicting Headers: Both Transfer-Encoding and "
                 "Content-Length are set."
@@ -751,7 +758,9 @@ class Response(object):
         """True if this Response is a well-formed HTTP redirect that could have
         been processed automatically (by :meth:`Session.resolve_redirects`).
         """
-        return "location" in self.headers and self.status_code in REDIRECT_STATI
+        return (
+            "location" in self.headers and self.status_code in REDIRECT_STATI
+        )
 
     @property
     def is_permanent_redirect(self):
@@ -796,7 +805,7 @@ class Response(object):
                 try:
                     for chunk in self.raw.stream(
                         # chunk_size, decode_content=True
-                        decode_content=True
+                        # decode_content=True
                     ):
                         yield chunk
 
@@ -840,7 +849,8 @@ class Response(object):
         if decode_unicode:
             if self.encoding is None:
                 raise TypeError(
-                    "encoding must be set before consuming streaming " "responses"
+                    "encoding must be set before consuming streaming "
+                    "responses"
                 )
 
             # check encoding value here, don't wait for the generator to be
@@ -930,7 +940,9 @@ class Response(object):
         if self._content is False:
             # Read the contents.
             if self._content_consumed:
-                raise RuntimeError("The content for this response was already consumed")
+                raise RuntimeError(
+                    "The content for this response was already consumed"
+                )
 
             if self.status_code == 0 or self.raw is None:
                 self._content = None
@@ -994,7 +1006,9 @@ class Response(object):
             if encoding is not None:
                 try:
                     content = self.content
-                    return complexjson.loads(content.decode(encoding), **kwargs)
+                    return complexjson.loads(
+                        content.decode(encoding), **kwargs
+                    )
 
                 except UnicodeDecodeError:
                     # Wrong UTF codec detected; usually because it's not UTF-8
@@ -1072,7 +1086,11 @@ class AsyncResponse(Response):
         :param \*\*kwargs: Optional arguments that ``json.loads`` takes.
         :raises ValueError: If the response body does not contain valid json.
         """
-        if not self.encoding and await self.content and len(await self.content) > 3:
+        if (
+            not self.encoding
+            and await self.content
+            and len(await self.content) > 3
+        ):
             # No encoding set. JSON RFC 4627 section 3 states we should expect
             # UTF-8, -16 or -32. Detect which one to use; If the detection or
             # decoding fails, fall back to `self.text` (using chardet to make
@@ -1081,7 +1099,9 @@ class AsyncResponse(Response):
             if encoding is not None:
                 try:
                     content = await self.content
-                    return complexjson.loads(content.decode(encoding), **kwargs)
+                    return complexjson.loads(
+                        content.decode(encoding), **kwargs
+                    )
 
                 except UnicodeDecodeError:
                     # Wrong UTF codec detected; usually because it's not UTF-8
@@ -1131,7 +1151,9 @@ class AsyncResponse(Response):
         if self._content is False:
             # Read the contents.
             if self._content_consumed:
-                raise RuntimeError("The content for this response was already consumed")
+                raise RuntimeError(
+                    "The content for this response was already consumed"
+                )
 
             if self.status_code == 0 or self.raw is None:
                 self._content = None
@@ -1140,7 +1162,9 @@ class AsyncResponse(Response):
                 # print(bytes().join(
                 #     [await self.iter_content(CONTENT_CHUNK_SIZE)]
                 # ))
-                self._content = bytes().join([await self.iter_content()]) or bytes()
+                self._content = (
+                    bytes().join([await self.iter_content()]) or bytes()
+                )
         self._content_consumed = True
         # don't need to release the connection; that's been handled by urllib3
         # since we exhausted the data.
@@ -1214,7 +1238,8 @@ class AsyncResponse(Response):
         if decode_unicode:
             if self.encoding is None:
                 raise TypeError(
-                    "encoding must be set before consuming streaming " "responses"
+                    "encoding must be set before consuming streaming "
+                    "responses"
                 )
 
             # check encoding value here, don't wait for the generator to be
