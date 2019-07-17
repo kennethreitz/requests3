@@ -1,9 +1,4 @@
-import trio
-
-from ._http import AsyncPoolManager, PoolManager
-from ._http._backends import TrioBackend
-
-from . import _http
+import http3
 
 __all__ = ["request", "blocking_request"]
 
@@ -13,21 +8,21 @@ async def request(
     url,
     timeout,
     *,
-    body=None,
+    data=None,
     headers=None,
-    preload_content=False,
-    pool=None,
+    stream=False,
+    client=None,
     **kwargs
 ):
     """Returns a Response object, to be awaited."""
-    if not pool:
-        pool = AsyncPoolManager(backend=TrioBackend())
-    return await pool.urlopen(
+    if not client:
+        client = http3.AsyncClient()
+    return await client.request(
         method=method,
         url=url,
         headers=headers,
-        preload_content=preload_content,
-        body=body,
+        stream=stream,
+        data=data,
         **kwargs
     )
 
@@ -37,22 +32,22 @@ def blocking_request(
     url,
     timeout,
     *,
-    body=None,
+    data=None,
     headers=None,
-    preload_content=False,
-    pool=None,
+    stream=False,
+    client=None,
     **kwargs
 ):
     """Returns a Response object."""
-    if not pool:
-        pool = PoolManager()
-    with pool as http:
-        r = http.urlopen(
+    if not client:
+        client = http3.Client()
+    with client as http:
+        r = http.request(
             method=method,
             url=url,
             headers=headers,
-            preload_content=preload_content,
-            body=body,
+            stream=stream,
+            data=data,
             **kwargs
         )
         return r

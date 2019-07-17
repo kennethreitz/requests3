@@ -120,7 +120,8 @@ def _pool_kwargs(verify, cert):
 
         if key_file and not os.path.exists(key_file):
             raise IOError(
-                "Could not find the TLS key file, " "invalid path: {0}".format(key_file)
+                "Could not find the TLS key file, "
+                "invalid path: {0}".format(key_file)
             )
 
     return pool_kwargs
@@ -133,7 +134,13 @@ class BaseAdapter(object):
         super(BaseAdapter, self).__init__()
 
     def send(
-        self, request, stream=False, timeout=None, verify=True, cert=None, proxies=None
+        self,
+        request,
+        stream=False,
+        timeout=None,
+        verify=True,
+        cert=None,
+        proxies=None,
     ):
         """Sends PreparedRequest object. Returns Response object.
 
@@ -331,12 +338,16 @@ class HTTPAdapter(BaseAdapter):
         if proxy:
             proxy = prepend_scheme_if_needed(proxy, "http")
             proxy_manager = self.proxy_manager_for(proxy)
-            conn = proxy_manager.connection_from_url(url, pool_kwargs=pool_kwargs)
+            conn = proxy_manager.connection_from_url(
+                url, pool_kwargs=pool_kwargs
+            )
         else:
             # Only scheme should be lower case
             parsed = urlparse(url)
             url = parsed.geturl()
-            conn = self.poolmanager.connection_from_url(url, pool_kwargs=pool_kwargs)
+            conn = self.poolmanager.connection_from_url(
+                url, pool_kwargs=pool_kwargs
+            )
         return conn
 
     def close(self):
@@ -405,11 +416,19 @@ class HTTPAdapter(BaseAdapter):
         headers = {}
         username, password = get_auth_from_url(proxy)
         if username:
-            headers["Proxy-Authorization"] = _basic_auth_str(username, password)
+            headers["Proxy-Authorization"] = _basic_auth_str(
+                username, password
+            )
         return headers
 
     def send(
-        self, request, stream=False, timeout=None, verify=True, cert=None, proxies=None
+        self,
+        request,
+        stream=False,
+        timeout=None,
+        verify=True,
+        cert=None,
+        proxies=None,
     ):
         """Sends PreparedRequest object. Returns Response object.
 
@@ -429,7 +448,9 @@ class HTTPAdapter(BaseAdapter):
         conn = self.get_connection(request.url, proxies, verify, cert)
         url = self.request_url(request, proxies)
         self.add_headers(request)
-        chunked = not (request.body is None or "Content-Length" in request.headers)
+        chunked = not (
+            request.body is None or "Content-Length" in request.headers
+        )
         if isinstance(timeout, tuple):
             try:
                 connect, read = timeout
@@ -452,16 +473,16 @@ class HTTPAdapter(BaseAdapter):
                 resp = core.blocking_request(
                     method=request.method,
                     url=url,
-                    body=request.body,
+                    data=request.body,
                     headers=request.headers,
-                    redirect=False,
-                    assert_same_host=False,
-                    preload_content=False,
-                    decode_content=False,
-                    retries=self.max_retries,
+                    # redirect=False,
+                    # assert_same_host=False,
+                    # stream=False,
+                    # decode_content=False,
+                    # retries=self.max_retries,
                     timeout=timeout,
-                    enforce_content_length=True,
-                    pool=conn,
+                    # enforce_content_length=True,
+                    client=conn,
                 )
             # Send the request.
             else:
@@ -469,7 +490,9 @@ class HTTPAdapter(BaseAdapter):
                     conn = conn.proxy_pool
                 low_conn = conn._get_conn(timeout=DEFAULT_POOL_TIMEOUT)
                 try:
-                    low_conn.putrequest(request.method, url, skip_accept_encoding=True)
+                    low_conn.putrequest(
+                        request.method, url, skip_accept_encoding=True
+                    )
                     for header, value in request.headers.items():
                         low_conn.putheader(header, value)
                     low_conn.endheaders()
@@ -550,7 +573,6 @@ class AsyncHTTPAdapter(HTTPAdapter):
     """docstring for AsyncHTTPAdapter"""
 
     def __init__(self, backend=None, *args, **kwargs):
-        self.backend = backend or TrioBackend()
         super(AsyncHTTPAdapter, self).__init__(*args, **kwargs)
 
     async def build_response(self, req, resp):
@@ -601,14 +623,13 @@ class AsyncHTTPAdapter(HTTPAdapter):
         self._pool_connections = connections
         self._pool_maxsize = maxsize
         self._pool_block = block
-        self.poolmanager = AsyncPoolManager(
-            num_pools=connections,
-            maxsize=maxsize,
-            block=block,
-            strict=True,
-            backend=self.backend,
-            **pool_kwargs,
-        )
+        # self.poolmanager = AsyncPoolManager(
+        #     num_pools=connections,
+        #     maxsize=maxsize,
+        #     block=block,
+        #     strict=True,
+        #     **pool_kwargs,
+        # )
 
     def get_connection(self, url, proxies=None, verify=None, cert=None):
         """Returns a urllib3 connection for the given URL. This should not be
@@ -624,12 +645,16 @@ class AsyncHTTPAdapter(HTTPAdapter):
         if proxy:
             proxy = prepend_scheme_if_needed(proxy, "http")
             proxy_manager = self.proxy_manager_for(proxy)
-            conn = proxy_manager.connection_from_url(url, pool_kwargs=pool_kwargs)
+            conn = proxy_manager.connection_from_url(
+                url, pool_kwargs=pool_kwargs
+            )
         else:
             # Only scheme should be lower case
             parsed = urlparse(url)
             url = parsed.geturl()
-            conn = self.poolmanager.connection_from_url(url, pool_kwargs=pool_kwargs)
+            conn = self.poolmanager.connection_from_url(
+                url, pool_kwargs=pool_kwargs
+            )
         return conn
 
     def close(self):
@@ -644,7 +669,13 @@ class AsyncHTTPAdapter(HTTPAdapter):
         pass
 
     async def send(
-        self, request, stream=False, timeout=None, verify=True, cert=None, proxies=None
+        self,
+        request,
+        stream=False,
+        timeout=None,
+        verify=True,
+        cert=None,
+        proxies=None,
     ):
         """Sends PreparedRequest object. Returns Response object.
 
@@ -665,7 +696,9 @@ class AsyncHTTPAdapter(HTTPAdapter):
 
         url = self.request_url(request, proxies)
         self.add_headers(request)
-        chunked = not (request.body is None or "Content-Length" in request.headers)
+        chunked = not (
+            request.body is None or "Content-Length" in request.headers
+        )
         if isinstance(timeout, tuple):
             try:
                 connect, read = timeout
@@ -706,7 +739,9 @@ class AsyncHTTPAdapter(HTTPAdapter):
                     conn = conn.proxy_pool
                 low_conn = conn._get_conn(timeout=DEFAULT_POOL_TIMEOUT)
                 try:
-                    low_conn.putrequest(request.method, url, skip_accept_encoding=True)
+                    low_conn.putrequest(
+                        request.method, url, skip_accept_encoding=True
+                    )
                     for header, value in request.headers.items():
                         low_conn.putheader(header, value)
                     low_conn.endheaders()

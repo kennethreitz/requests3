@@ -21,11 +21,8 @@ detox = "*"
 httpbin = ">=0.7.0"
 pytest = "*"
 pytest-mypy = "*"
-white = {version = "*"}
 "rfc3986" = "*"
-twisted = {extras = ["tls"]}
-httpcore = {git = "https://github.com/encode/httpcore.git"}
-trio = "*"
+http3 = {git = "https://github.com/encode/http3.git"}
 
 [dev-packages]
 requests = {path = ".",editable = true,extras = ["test,socks"]}
