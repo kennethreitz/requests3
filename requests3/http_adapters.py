@@ -217,6 +217,7 @@ class HTTPAdapter(BaseAdapter):
         response.headers = HTTPHeaderDict(getattr(resp, "headers", {}))
         # Set encoding.
         response.encoding = get_encoding_from_headers(response.headers)
+        response.protocol = getattr(resp, "protocol", None)
         response.raw = resp
         response.reason = getattr(resp, "reason_phrase", None)
         if isinstance(req.url, bytes):
@@ -416,6 +417,7 @@ class AsyncHTTPAdapter(HTTPAdapter):
 
     def __init__(self, backend=None, *args, **kwargs):
         super(AsyncHTTPAdapter, self).__init__(*args, **kwargs)
+        self.client = core.http3.AsyncClient()
 
     async def build_response(self, req, resp):
         """Builds a :class:`Response <requests.Response>` object from a urllib3
@@ -429,13 +431,14 @@ class AsyncHTTPAdapter(HTTPAdapter):
         """
         response = AsyncResponse()
         # Fallback to None if there's no status_code, for whatever reason.
-        response.status_code = getattr(resp, "status", None)
+        response.status_code = getattr(resp, "status_code", None)
         # Make headers case-insensitive.
         response.headers = HTTPHeaderDict(getattr(resp, "headers", {}))
         # Set encoding.
         response.encoding = get_encoding_from_headers(response.headers)
         response.raw = resp
-        # response.reason = response.raw.reason
+        response.reason = getattr(resp, "reason_phrase", None)
+        response.protocol = getattr(resp, "protocol", None)
         if isinstance(req.url, bytes):
             response.url = req.url.decode("utf-8")
         else:
@@ -447,67 +450,15 @@ class AsyncHTTPAdapter(HTTPAdapter):
         response.connection = self
         return response
 
-    def init_poolmanager(
-        self, connections, maxsize, block=DEFAULT_POOLBLOCK, **pool_kwargs
-    ):
-        """Initializes a urllib3 PoolManager.
-
-        This method should not be called from user code, and is only
-        exposed for use when subclassing the
-        :class:`HTTPAdapter <requests.adapters.HTTPAdapter>`.
-
-        :param connections: The number of urllib3 connection pools to cache.
-        :param maxsize: The maximum number of connections to save in the pool.
-        :param block: Block when no free connections are available.
-        :param pool_kwargs: Extra keyword arguments used to initialize the Pool Manager.
-        """
-        # save these values for pickling
-        self._pool_connections = connections
-        self._pool_maxsize = maxsize
-        self._pool_block = block
-        # self.poolmanager = AsyncPoolManager(
-        #     num_pools=connections,
-        #     maxsize=maxsize,
-        #     block=block,
-        #     strict=True,
-        #     **pool_kwargs,
-        # )
-
-    def get_connection(self, url, proxies=None, verify=None, cert=None):
-        """Returns a urllib3 connection for the given URL. This should not be
-        called from user code, and is only exposed for use when subclassing the
-        :class:`HTTPAdapter <requests.adapters.HTTPAdapter>`.
-
-        :param url: The URL to connect to.
-        :param proxies: (optional) A Requests-style dictionary of proxies used on this request.
-        :rtype: urllib3.ConnectionPool
-        """
-        pool_kwargs = _pool_kwargs(verify, cert)
-        proxy = select_proxy(url, proxies)
-        if proxy:
-            proxy = prepend_scheme_if_needed(proxy, "http")
-            proxy_manager = self.proxy_manager_for(proxy)
-            conn = proxy_manager.connection_from_url(
-                url, pool_kwargs=pool_kwargs
-            )
-        else:
-            # Only scheme should be lower case
-            parsed = urlparse(url)
-            url = parsed.geturl()
-            conn = self.poolmanager.connection_from_url(
-                url, pool_kwargs=pool_kwargs
-            )
-        return conn
-
     def close(self):
         """Disposes of any internal state.
 
         Currently, this closes the PoolManager and any active ProxyManager,
         which closes any pooled connections.
         """
-        self.poolmanager.clear()
-        for proxy in self.proxy_manager.values():
-            proxy.clear()
+        # self.poolmanager.clear()
+        # for proxy in self.proxy_manager.values():
+        # proxy.clear()
         pass
 
     async def send(
@@ -534,7 +485,7 @@ class AsyncHTTPAdapter(HTTPAdapter):
         :param proxies: (optional) The proxies dictionary to apply to the request.
         :rtype: requests.Response
         """
-        conn = self.get_connection(request.url, proxies, verify, cert)
+        # conn = self.get_connection(request.url, proxies, verify, cert)
 
         url = self.request_url(request, proxies)
         self.add_headers(request)
@@ -544,7 +495,7 @@ class AsyncHTTPAdapter(HTTPAdapter):
         if isinstance(timeout, tuple):
             try:
                 connect, read = timeout
-                timeout = TimeoutSauce(connect=connect, read=read)
+                # timeout = TimeoutSauce(connect=connect, read=read)
             except ValueError as e:
                 # this may raise a string formatting error.
                 err = (
@@ -553,106 +504,39 @@ class AsyncHTTPAdapter(HTTPAdapter):
                     "both timeouts to the same value".format(timeout)
                 )
                 raise ValueError(err)
-
-        elif isinstance(timeout, TimeoutSauce):
-            pass
-        else:
-            timeout = TimeoutSauce(connect=timeout, read=timeout)
+        #
+        # elif isinstance(timeout, TimeoutSauce):
+        # pass
+        # else:
+        # timeout = TimeoutSauce(connect=timeout, read=timeout)
         try:
-            if not chunked:
-                resp = await core.request(
-                    method=request.method,
-                    url=url,
-                    body=request.body,
-                    headers=request.headers,
-                    redirect=False,
-                    assert_same_host=False,
-                    preload_content=False,
-                    decode_content=False,
-                    retries=self.max_retries,
-                    timeout=timeout,
-                    enforce_content_length=True,
-                    pool=conn,
-                )
+            resp = await core.request(
+                method=request.method,
+                url=url,
+                data=request.body,
+                headers=[(k, request.headers[k]) for k in request.headers],
+                # redirect=False,
+                # assert_same_host=False,
+                # preload_content=False,
+                # decode_content=False,
+                # retries=self.max_retries,
+                timeout=timeout,
+                # enforce_content_length=True,
+                client=self.client,
+            )
 
-            # Send the request.
-            else:
-                if hasattr(conn, "proxy_pool"):
-                    conn = conn.proxy_pool
-                low_conn = conn._get_conn(timeout=DEFAULT_POOL_TIMEOUT)
-                try:
-                    low_conn.putrequest(
-                        request.method, url, skip_accept_encoding=True
-                    )
-                    for header, value in request.headers.items():
-                        low_conn.putheader(header, value)
-                    low_conn.endheaders()
-                    for i in request.body:
-                        chunk_size = len(i)
-                        if chunk_size == 0:
-                            continue
-
-                        low_conn.send(hex(chunk_size)[2:].encode("utf-8"))
-                        low_conn.send(b"\r\n")
-                        low_conn.send(i)
-                        low_conn.send(b"\r\n")
-                    low_conn.send(b"0\r\n\r\n")
-                    # Receive the response from the server
-                    try:
-                        # For Python 2.7, use buffering of HTTP responses
-                        r = alow_conn.getresponse(buffering=True)
-                    except TypeError:
-                        # For Python 3.3+ versions, this is the default
-                        r = low_conn.getresponse()
-                    resp = HTTPResponse.from_httplib(
-                        r,
-                        pool=conn,
-                        connection=low_conn,
-                        preload_content=False,
-                        decode_content=False,
-                        enforce_content_length=True,
-                        request_method=request.method,
-                    )
-                except:
-                    # If we hit any problems here, clean up the connection.
-                    # Then, reraise so that we can handle the actual exception.
-                    low_conn.close()
-                    raise
-
-        except (ProtocolError, socket.error) as err:
+        except (core.http3.exceptions.ProtocolError, socket.error) as err:
             raise ConnectionError(err, request=request)
 
-        except MaxRetryError as e:
-            if isinstance(e.reason, ConnectTimeoutError):
-                # TODO: Remove this in 3.0.0: see #2811
-                if not isinstance(e.reason, NewConnectionError):
-                    raise ConnectTimeout(e, request=request)
-
-            if isinstance(e.reason, ResponseError):
-                raise RetryError(e, request=request)
-
-            if isinstance(e.reason, _ProxyError):
-                raise ProxyError(e, request=request)
-
-            if isinstance(e.reason, _SSLError):
-                # This branch is for urllib3 v1.22 and later.
-                raise SSLError(e, request=request)
-
+        except core.http3.exceptions.PoolTimeout as e:
             raise ConnectionError(e, request=request)
 
-        except ClosedPoolError as e:
-            raise ConnectionError(e, request=request)
+        except (core.http3.exceptions.HttpError,) as e:
 
-        except _ProxyError as e:
-            raise ProxyError(e)
-
-        except (_SSLError, _HTTPError) as e:
-            if isinstance(e, _SSLError):
-                # This branch is for urllib3 versions earlier than v1.22
-                raise SSLError(e, request=request)
-
-            elif isinstance(e, ReadTimeoutError):
-                raise ReadTimeout(e, request=request)
+            if isinstance(e, core.http3.exceptions.PoolTimeout.ReadTimeout):
+                raise core.http3.exceptions.PoolTimeout.ReadTimeout(
+                    e, request=request
+                )
 
             else:
                 raise

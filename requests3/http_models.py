@@ -669,6 +669,7 @@ class Response(object):
         "cookies",
         "elapsed",
         "request",
+        "protocol",
     ]
     __slots__ = __attrs__ + ["_content_consumed", "raw", "_next", "connection"]
 
@@ -731,11 +732,15 @@ class Response(object):
         setattr(self, "raw", None)
 
     def __repr__(self):
-        return "<Response [%s]>" % (self.status_code)
+        return f"<Response status={(self.status_code)} authority={self.uri.authority!r} protocol={self.protocol!r} elapsed={self.elapsed.microseconds:_}ms>"
 
     def __iter__(self):
         """Allows you to use a response as an iterator."""
         return self.iter_content(128)
+
+    @property
+    def uri(self):
+        return rfc3986.urlparse(self.url)
 
     @property
     def ok(self):
@@ -825,7 +830,7 @@ class Response(object):
             else:
                 # Standard file-like object.
                 while True:
-                    chunk = self.raw.read(chunk_size)
+                    chunk = self.raw.read(DEFAULT_CHUNK_SIZE)
                     if not chunk:
                         break
 
@@ -1198,7 +1203,7 @@ class AsyncResponse(Response):
             # Special case for requests.core.
             if hasattr(self.raw, "stream"):
                 try:
-                    async for chunk in self.raw.stream(decode_content=True):
+                    async for chunk in self.raw.stream():
                         yield chunk
 
                 except ProtocolError as e:

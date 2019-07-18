@@ -702,8 +702,8 @@ class AsyncHTTPSession(HTTPSession):
     def __init__(self, backend=None):
         super(AsyncHTTPSession, self).__init__()
 
-        self.mount("https://", AsyncHTTPAdapter(backend=self.backend))
-        self.mount("http://", AsyncHTTPAdapter(backend=self.backend))
+        self.mount("https://", AsyncHTTPAdapter())
+        self.mount("http://", AsyncHTTPAdapter())
 
     async def get(self, url, **kwargs):
         r"""Sends a GET request. Returns :class:`Response` object.
