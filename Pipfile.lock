@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "293a625c26f4b292ee0e5e7fc1e51b5b22d0268a1e96a586a0cba99ce961153d"
+            "sha256": "77b0a1107f54a070d325d1e1338596b4022f91261db097b059f5a6aad5d915a9"
         },
         "pipfile-spec": 6,
         "requires": {},
@@ -291,7 +291,7 @@
         },
         "http3": {
             "git": "https://github.com/encode/http3.git",
-            "ref": "ba83e29aee162c16b3ba8e4ee0629e88bf4ecaeb"
+            "ref": "0e8dae4815327462345e36326f218a36dc6aa3aa"
         },
         "httpbin": {
             "hashes": [
