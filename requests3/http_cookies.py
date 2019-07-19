@@ -103,6 +103,14 @@ class MockRequest(object):
         return self.get_host()
 
 
+class Headers:
+    def __init__(self, headers):
+        self._headers = headers
+
+    def get_all(self, key, default):
+        return self._headers.getlist(key, default)
+
+
 class MockResponse(object):
     """Wraps a `httplib.HTTPMessage` to mimic a `urllib.addinfourl`.
 
@@ -117,11 +125,18 @@ class MockResponse(object):
         """
         self._headers = headers
 
+    def get_all(self, name, default):
+        return self.getheaders(self, name)
+
     def info(self):
-        return self._headers
+        return self.headers
 
     def getheaders(self, name):
-        self._headers.getheaders(name)
+        return self.headers.getlist(name)
+
+    @property
+    def headers(self):
+        return Headers(self._headers)
 
 
 def extract_cookies_to_jar(jar, request, response):
@@ -131,14 +146,30 @@ def extract_cookies_to_jar(jar, request, response):
     :param request: our own requests.Request object
     :param response: urllib3.HTTPResponse object
     """
-    if not (hasattr(response, "_original_response") and response._original_response):
-        return
+    if not hasattr(response, 'cookies'):
+        return None
+    # if not (
+    #     hasattr(response, "_original_response") and response._original_response
+    # ):
+    #     return
 
     # the _original_response field is the wrapped httplib.HTTPResponse object,
     req = MockRequest(request)
-    # pull out the HTTPMessage with the headers and put it in the mock:
-    res = MockResponse(response._original_response.headers)
+    # # pull out the HTTPMessage with the headers and put it in the mock:
+    res = MockResponse(response.headers)
+    # jar.extract_cookies(res, req)
+
+    if not hasattr(response, 'cookies'):
+        return None
+
+    # mock_request = MockRequest(request)
     jar.extract_cookies(res, req)
+
+
+#
+# for cookie in response.cookies.jar:
+# if not cookie.is_expired:
+# jar.set_cookie(cookie, req)
 
 
 def get_cookie_header(jar, request):
@@ -218,7 +249,10 @@ class RequestsCookieJar(cookielib.CookieJar, MutableMapping):
         # support client code that unsets cookies by assignment of a None value:
         if value is None:
             remove_cookie_by_name(
-                self, name, domain=kwargs.get("domain"), path=kwargs.get("path")
+                self,
+                name,
+                domain=kwargs.get("domain"),
+                path=kwargs.get("path"),
             )
             return
 
@@ -362,7 +396,9 @@ class RequestsCookieJar(cookielib.CookieJar, MutableMapping):
             and cookie.value.endswith('"')
         ):
             cookie.value = cookie.value.replace('\\"', "")
-        return super(RequestsCookieJar, self).set_cookie(cookie, *args, **kwargs)
+        return super(RequestsCookieJar, self).set_cookie(
+            cookie, *args, **kwargs
+        )
 
     def update(self, other):
         """Updates this jar with cookies from another CookieJar or dict-like"""
@@ -413,7 +449,8 @@ class RequestsCookieJar(cookielib.CookieJar, MutableMapping):
                             toReturn is not None
                         ):  # if there are multiple cookies that meet passed in criteria
                             raise CookieConflictError(
-                                "There are multiple cookies with name, %r" % (name)
+                                "There are multiple cookies with name, %r"
+                                % (name)
                             )
 
                         toReturn = (
@@ -509,7 +546,9 @@ def morsel_to_cookie(morsel):
 
     elif morsel["expires"]:
         time_template = "%a, %d-%b-%Y %H:%M:%S GMT"
-        expires = calendar.timegm(time.strptime(morsel["expires"], time_template))
+        expires = calendar.timegm(
+            time.strptime(morsel["expires"], time_template)
+        )
     return create_cookie(
         comment=morsel["comment"],
         comment_url=bool(morsel["comment"]),
@@ -557,7 +596,9 @@ def merge_cookies(cookiejar, cookies):
         raise ValueError("You can only merge into CookieJar")
 
     if isinstance(cookies, dict):
-        cookiejar = cookiejar_from_dict(cookies, cookiejar=cookiejar, overwrite=False)
+        cookiejar = cookiejar_from_dict(
+            cookies, cookiejar=cookiejar, overwrite=False
+        )
     elif isinstance(cookies, cookielib.CookieJar):
         try:
             cookiejar.update(cookies)

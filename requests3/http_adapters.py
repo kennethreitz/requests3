@@ -10,6 +10,7 @@ and maintain connections.
 import os.path
 import socket
 
+import rfc3986
 from . import core
 
 from .http_models import Response, AsyncResponse
@@ -250,12 +251,11 @@ class HTTPAdapter(BaseAdapter):
         # is_proxied_http_request = proxy and scheme != "https"
         # using_socks_proxy = False
         # if proxy:
-        #     proxy_scheme = urlparse(proxy).scheme.lower()
-        #     using_socks_proxy = proxy_scheme.startswith("socks")
+        # proxy_scheme = urlparse(proxy).scheme.lower()
+        # using_socks_proxy = proxy_scheme.startswith("socks")
         # url = request.path_url
         # if is_proxied_http_request and not using_socks_proxy:
-        #     url = urldefragauth(request.url)
-        # return url
+        # url = urldefragauth(request.url)
         return request.url
 
     def add_headers(self, request, **kwargs):
@@ -334,63 +334,19 @@ class HTTPAdapter(BaseAdapter):
                 )
                 raise ValueError(err)
         try:
-            if not chunked:
-                resp = core.blocking_request(
-                    method=request.method,
-                    url=url,
-                    data=request.body,
-                    headers=[(k, request.headers[k]) for k in request.headers],
-                    allow_redirects=False,
-                    # assert_same_host=False,
-                    # stream=False,
-                    # decode_content=False,
-                    timeout=timeout,
-                    # enforce_content_length=True,
-                    client=self.client,
-                )
-            # Send the request.
-            else:
-                if hasattr(conn, "proxy_pool"):
-                    conn = conn.proxy_pool
-                low_conn = conn._get_conn(timeout=DEFAULT_POOL_TIMEOUT)
-                try:
-                    low_conn.putrequest(
-                        request.method, url, skip_accept_encoding=True
-                    )
-                    for header, value in request.headers.items():
-                        low_conn.putheader(header, value)
-                    low_conn.endheaders()
-                    for i in request.body:
-                        chunk_size = len(i)
-                        if chunk_size == 0:
-                            continue
-
-                        low_conn.send(hex(chunk_size)[2:].encode("utf-8"))
-                        low_conn.send(b"\r\n")
-                        low_conn.send(i)
-                        low_conn.send(b"\r\n")
-                    low_conn.send(b"0\r\n\r\n")
-                    # Receive the response from the server
-                    try:
-                        # For Python 2.7, use buffering of HTTP responses
-                        r = low_conn.getresponse(buffering=True)
-                    except TypeError:
-                        # For Python 3.3+ versions, this is the default
-                        r = low_conn.getresponse()
-                    resp = HTTPResponse.from_httplib(
-                        r,
-                        pool=conn,
-                        connection=low_conn,
-                        preload_content=False,
-                        decode_content=False,
-                        enforce_content_length=True,
-                        request_method=request.method,
-                    )
-                except:
-                    # If we hit any problems here, clean up the connection.
-                    # Then, reraise so that we can handle the actual exception.
-                    low_conn.close()
-                    raise
+            resp = core.blocking_request(
+                method=request.method,
+                url=url,
+                data=request.body,
+                headers=[(k, request.headers[k]) for k in request.headers],
+                allow_redirects=False,
+                # assert_same_host=False,
+                # stream=False,
+                # decode_content=False,
+                timeout=timeout,
+                # enforce_content_length=True,
+                client=self.client,
+            )
 
         except (core.http3.exceptions.ProtocolError, socket.error) as err:
             raise ConnectionError(err, request=request)

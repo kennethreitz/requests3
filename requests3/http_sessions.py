@@ -12,6 +12,7 @@ import time
 from collections import Mapping, OrderedDict
 from datetime import timedelta
 
+import rfc3986
 from .core._http._backends.trio_backend import TrioBackend
 
 from .http_auth import _basic_auth_str
@@ -131,6 +132,7 @@ class SessionRedirectMixin(object):
             # This causes incorrect handling of UTF8 encoded location headers.
             # To solve this, we re-encode the location in latin1.
             location = location.encode("latin1")
+
             return to_native_string(location, "utf8")
 
         return None
