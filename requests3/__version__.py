@@ -3,7 +3,7 @@
 # ' ' `-' `-`.`-' `-' `-'  '  `-'
 __title__ = "requests3"
 __description__ = "Python HTTP for Humans."
-__url__ = "http://python-requests.org"
+__url__ = "https://3.python-requests.org"
 __version__ = "3.0.0a1"
 __build__ = 0x030000
 __author__ = "Kenneth Reitz"
