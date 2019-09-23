@@ -1,7 +1,7 @@
 # .-. .-. .-. . . .-. .-. .-. .-.
 # |(  |-  |.| | | |-  `-.  |  `-.
 # ' ' `-' `-`.`-' `-' `-'  '  `-'
-__title__ = "requests"
+__title__ = "requests3"
 __description__ = "Python HTTP for Humans."
 __url__ = "http://python-requests.org"
 __version__ = "3.0.0a1"
