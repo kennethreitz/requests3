@@ -1,3 +1,3 @@
-- Start using httpcore: see https://github.com/encode/httpcore/issues/78 for updates.
 - Restore API (I removed some endpoints that I shouldn't have).
 - Retries for idenpotent requests.
+- Documentation.
