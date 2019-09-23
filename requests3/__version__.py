@@ -4,7 +4,7 @@
 __title__ = "requests"
 __description__ = "Python HTTP for Humans."
 __url__ = "http://python-requests.org"
-__version__ = "3.0.0"
+__version__ = "3.0.0a1"
 __build__ = 0x030000
 __author__ = "Kenneth Reitz"
 __author_email__ = "me@kennethreitz.org"
