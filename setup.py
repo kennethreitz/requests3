@@ -76,9 +76,7 @@ test_requirements = [
 ]
 
 about = {}
-with open(
-    os.path.join(here, "requests3", "__version__.py"), "r", "utf-8"
-) as f:
+with open(os.path.join(here, "requests3", "__version__.py"), "r", "utf-8") as f:
     exec(f.read(), about)
 
 with open("README.md", "r", "utf-8") as f:
@@ -96,17 +94,17 @@ setup(
     url=about["__url__"],
     packages=packages,
     package_data={"": ["LICENSE", "NOTICE"], "requests": ["*.pem"]},
-    package_dir={"requests": "requests"},
+    package_dir={"requests3": "requests3"},
     include_package_data=True,
     python_requires=">=3.6",
     install_requires=requires,
     license=about["__license__"],
     zip_safe=False,
     classifiers=[
-        "Development Status :: 5 - Production/Stable",
+        # "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",
         "Natural Language :: English",
-        "License :: OSI Approved :: Apache Software License",
+        "License :: CC0 1.0 Universal (CC0 1.0) Public Domain Dedication",
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.6",
@@ -118,14 +116,8 @@ setup(
     cmdclass={"test": PyTest, "mypy": MyPyTest, "format": Format},
     tests_require=test_requirements,
     extras_require={
-        "security": [
-            "pyOpenSSL >= 0.14",
-            "cryptography>=1.3.4",
-            "idna>=2.0.0",
-        ],
+        "security": ["pyOpenSSL >= 0.14", "cryptography>=1.3.4", "idna>=2.0.0"],
         "socks": ["PySocks>=1.5.6, !=1.5.7"],
-        'socks:sys_platform == "win32" and python_version == "2.7"': [
-            "win_inet_pton"
-        ],
+        'socks:sys_platform == "win32" and python_version == "2.7"': ["win_inet_pton"],
     },
 )
